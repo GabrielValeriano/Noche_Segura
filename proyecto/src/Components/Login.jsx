@@ -109,8 +109,8 @@ const Login = () => {
     return (
       <div className="login-container">
         <h2>¡Bienvenido, {username}!</h2>
-        <p>Tu ID de usuario es: <strong>{userId}</strong></p>
-        <p>Último inicio de sesión: <strong>{lastLogin}</strong></p>
+        <p className='color'>Tu ID de usuario es: <strong>{userId}</strong></p>
+        <p className='color'>Último inicio de sesión: <strong>{lastLogin}</strong></p>
         <button onClick={handleLogout}>Cerrar Sesión</button>
       </div>
     );
