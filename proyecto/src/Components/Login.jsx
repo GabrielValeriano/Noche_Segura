@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 
 // Componente principal para el login y registro de usuarios.
@@ -11,100 +11,92 @@ const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [lastLogin, setLastLogin] = useState(null);
-  
-  // Estado que actúa como nuestra "base de datos" de usuarios en localStorage.
-  const [usersDb, setUsersDb] = useState({});
-
-  // Efecto que se ejecuta una vez al inicio del componente para cargar datos del navegador.
-  useEffect(() => {
-    // Carga los usuarios y el estado de la sesión si ya existen en localStorage.
-    const storedUsers = localStorage.getItem('usersDb');
-    if (storedUsers) {
-      setUsersDb(JSON.parse(storedUsers));
-    }
-    const storedUserId = localStorage.getItem('userId');
-    const storedLastLogin = localStorage.getItem('lastLogin');
-
-    if (storedUserId) {
-      setIsLoggedIn(true);
-      setUserId(storedUserId);
-      setLastLogin(storedLastLogin);
-    }
-  }, []);
 
   // Función para manejar el registro de un nuevo usuario.
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validaciones para campos vacíos, nombre de usuario y email duplicados.
     if (!username || !email || !password) {
       setError('Todos los campos son obligatorios.');
       return;
     }
-    if (usersDb[username]) {
-      setError('Este nombre de usuario ya existe. Elige otro.');
-      return;
-    }
-    const emailExists = Object.values(usersDb).some(user => user.email === email);
-    if (emailExists) {
-      setError('Este correo electrónico ya está registrado.');
-      return;
-    }
 
-    // Genera un ID numérico simple y único basado en la cantidad de usuarios.
-    const newUserId = Object.keys(usersDb).length + 1;
-    const newUser = {
-      id: newUserId.toString(),
-      email: email,
-      password: password,
-      lastLogin: null,
-    };
+    try {
+      const response = await fetch('http://localhost:5000/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre_usuario: username,
+          email: email,
+          contrasena: password,
+        }),
+      });
 
-    // Actualiza la base de datos de usuarios y la guarda en localStorage.
-    const updatedUsersDb = { ...usersDb, [username]: newUser };
-    setUsersDb(updatedUsersDb);
-    localStorage.setItem('usersDb', JSON.stringify(updatedUsersDb));
-    setError('Registro exitoso. ¡Ahora puedes iniciar sesión!');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al registrar el usuario.');
+      }
+      
+      setError('Registro exitoso. ¡Ahora puedes iniciar sesión!');
+      // Limpia los campos del formulario
+      setUsername('');
+      setEmail('');
+      setPassword('');
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    }
   };
 
   // Función para manejar el inicio de sesión.
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     
-    // Busca al usuario por nombre de usuario o por email.
-    let user = usersDb[username];
-    if (!user) {
-      user = Object.values(usersDb).find(u => u.email === email);
-    }
-
-    // Si el usuario existe y la contraseña es correcta, inicia la sesión.
-    if (user && user.password === password) {
-      setIsLoggedIn(true);
-      setUserId(user.id);
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          usuario_o_email: username || email, 
+          contrasena: password,
+        }),
+      });
       
-      // Guarda la fecha y hora de inicio de sesión.
-      const now = new Date();
-      const formattedTime = now.toLocaleString();
-      setLastLogin(formattedTime);
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('lastLogin', formattedTime);
-    } else {
-      setError('Usuario, correo o contraseña incorrectos. 😞');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Usuario o contraseña incorrectos. 😞');
+      }
+
+      setIsLoggedIn(true);
+      setUserId(data.usuario_id);
+      setLastLogin(new Date().toLocaleString());
+      setUsername(data.nombre_usuario);
+      setEmail(data.email);
+      
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
     }
   };
 
-  // Función para cerrar la sesión y limpiar los datos de localStorage.
+  // Función para cerrar la sesión
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserId(null);
     setLastLogin(null);
-    localStorage.removeItem('userId');
-    localStorage.removeItem('lastLogin');
+    setUsername('');
+    setEmail('');
+    setPassword('');
   };
-
-  // Renderizado condicional: muestra la pantalla de bienvenida o el formulario.
+  
   if (isLoggedIn) {
     return (
       <div className="login-container">
@@ -127,7 +119,6 @@ const Login = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            required
           />
         </div>
         <div className="form-group">
@@ -137,7 +128,6 @@ const Login = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
         </div>
         <div className="form-group">
