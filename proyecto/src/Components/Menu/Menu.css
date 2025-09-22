@@ -1,0 +1,82 @@
+/* Contenedor general */
+.menu-container {
+  background: url("./fondo.jpg") no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Tarjeta de bienvenida */
+.welcome-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 12px;
+  border: 4px solid #ffcc00;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-card h2 {
+  margin-bottom: 15px;
+}
+
+.welcome-card p {
+  margin: 8px 0;
+}
+
+.welcome-card button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.welcome-card button:hover {
+  background-color: #0056b3;
+}
+
+/* Menú principal */
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid #ffcc00;
+}
+
+.menu-header h2 {
+  margin: 0;
+}
+
+/* Botón cerrar sesión */
+.logout-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: #a71d2a;
+}
+
+/* Lista de*/

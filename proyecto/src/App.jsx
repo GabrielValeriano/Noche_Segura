@@ -1,17 +1,23 @@
-import { useState } from 'react'
-import './App.css'
-import Login from './Components/Login'
+import React, { useState } from "react";
+import "./App.css";
+import Login from "./Components/Login";
+import Menu from "./Components/Menu/Menu";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleContinue = () => setShowMenu(true);
+  const handleLogout = () => setShowMenu(false);
 
   return (
-    <>
-      <div >
-       <Login></Login>
-      </div>
-    </>
-  )
+    <div className="App">
+      {!showMenu ? (
+        <Login onContinue={handleContinue} />
+      ) : (
+        <Menu onLogout={handleLogout} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

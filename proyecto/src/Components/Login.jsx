@@ -1,29 +1,27 @@
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect } from "react";
 
 // Componente principal para el login y registro de usuarios.
 const Login = () => {
   // Estados para manejar los datos del formulario y el estado de la aplicación.
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [lastLogin, setLastLogin] = useState(null);
-  
   // Estado que actúa como nuestra "base de datos" de usuarios en localStorage.
   const [usersDb, setUsersDb] = useState({});
 
   // Efecto que se ejecuta una vez al inicio del componente para cargar datos del navegador.
   useEffect(() => {
     // Carga los usuarios y el estado de la sesión si ya existen en localStorage.
-    const storedUsers = localStorage.getItem('usersDb');
+    const storedUsers = localStorage.getItem("usersDb");
     if (storedUsers) {
       setUsersDb(JSON.parse(storedUsers));
     }
-    const storedUserId = localStorage.getItem('userId');
-    const storedLastLogin = localStorage.getItem('lastLogin');
+    const storedUserId = localStorage.getItem("userId");
+    const storedLastLogin = localStorage.getItem("lastLogin");
 
     if (storedUserId) {
       setIsLoggedIn(true);
@@ -35,20 +33,22 @@ const Login = () => {
   // Función para manejar el registro de un nuevo usuario.
   const handleRegister = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Validaciones para campos vacíos, nombre de usuario y email duplicados.
     if (!username || !email || !password) {
-      setError('Todos los campos son obligatorios.');
+      setError("Todos los campos son obligatorios.");
       return;
     }
     if (usersDb[username]) {
-      setError('Este nombre de usuario ya existe. Elige otro.');
+      setError("Este nombre de usuario ya existe. Elige otro.");
       return;
     }
-    const emailExists = Object.values(usersDb).some(user => user.email === email);
+    const emailExists = Object.values(usersDb).some(
+      (user) => user.email === email
+    );
     if (emailExists) {
-      setError('Este correo electrónico ya está registrado.');
+      setError("Este correo electrónico ya está registrado.");
       return;
     }
 
@@ -64,34 +64,34 @@ const Login = () => {
     // Actualiza la base de datos de usuarios y la guarda en localStorage.
     const updatedUsersDb = { ...usersDb, [username]: newUser };
     setUsersDb(updatedUsersDb);
-    localStorage.setItem('usersDb', JSON.stringify(updatedUsersDb));
-    setError('Registro exitoso. ¡Ahora puedes iniciar sesión!');
+    localStorage.setItem("usersDb", JSON.stringify(updatedUsersDb));
+    setError("Registro exitoso. ¡Ahora puedes iniciar sesión!");
   };
 
   // Función para manejar el inicio de sesión.
   const handleLogin = (e) => {
     e.preventDefault();
-    setError('');
-    
+    setError("");
+
     // Busca al usuario por nombre de usuario o por email.
     let user = usersDb[username];
     if (!user) {
-      user = Object.values(usersDb).find(u => u.email === email);
+      user = Object.values(usersDb).find((u) => u.email === email);
     }
 
     // Si el usuario existe y la contraseña es correcta, inicia la sesión.
     if (user && user.password === password) {
       setIsLoggedIn(true);
       setUserId(user.id);
-      
+
       // Guarda la fecha y hora de inicio de sesión.
       const now = new Date();
       const formattedTime = now.toLocaleString();
       setLastLogin(formattedTime);
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('lastLogin', formattedTime);
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("lastLogin", formattedTime);
     } else {
-      setError('Usuario, correo o contraseña incorrectos. 😞');
+      setError("Usuario, correo o contraseña incorrectos. 😞");
     }
   };
 
@@ -100,62 +100,50 @@ const Login = () => {
     setIsLoggedIn(false);
     setUserId(null);
     setLastLogin(null);
-    localStorage.removeItem('userId');
-    localStorage.removeItem('lastLogin');
+    localStorage.removeItem("userId");
+    localStorage.removeItem("lastLogin");
   };
 
   // Renderizado condicional: muestra la pantalla de bienvenida o el formulario.
   if (isLoggedIn) {
-    return (
-      <div className="login-container2">
-        <h2>¡Bienvenido, {username}!</h2>
-        <h3 className='colorp'>Tu ID de usuario es: <strong>{userId}</strong></h3>
-        <h3 className='colorp'>Último inicio de sesión: <strong>{lastLogin}</strong></h3>
-        <button onClick={handleLogout}>Cerrar Sesión</button>
-      </div>
-    );
+    return <div className="login-container2"></div>;
   }
 
   return (
     <div className="login-container">
-      <h2>Iniciar Sesión o Registrarse</h2>
-      <form>
-        <div className="form-group">
-          <label htmlFor="username">Usuario</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
+      <h2>Iniciar Sesion</h2>
+      <div>
+        <div>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            placeholder="Correo electronico"
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="password">Contraseña</label>
+        <div>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            placeholder="Contraseña"
           />
+        </div>
+        <div>
+          <h4>¿No tiene cuenta?</h4>
+          <a href="">Registrarse</a>
         </div>
         {error && <p className="error-message">{error}</p>}
         <div className="button-group">
-          <button type="button" onClick={handleRegister}>Registrarse</button>
-          <button type="button" onClick={handleLogin}>Entrar</button>
+          <button type="button" onClick={handleLogin}>
+            Ingresar
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

@@ -1,121 +1,115 @@
+b/* --- Estilos del body para el fondo y la tipografía --- */
 body {
-  /* Mantener el centrado de los elementos */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  /* Estilos para la imagen de fondo */
-  background-image: url('https://media.ambito.com/p/733b3d8b9c4401096ef389e3a824fab5/adjuntos/239/imagenes/040/643/0040643020/parada-colectivos-nochejpg.jpg'); /* ¡IMPORTANTE: Reemplaza esto con la URL real de tu imagen! */
-  background-size: cover; /* Ajusta la imagen para cubrir todo el fondo sin distorsionarse */
-  background-position: center center; /* Centra la imagen en el fondo */
-  background-repeat: no-repeat; /* Evita que la imagen se repita */
-  background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll (opcional, pero queda bien) */
-
-  /* El resto de tus estilos de body (fuente, etc.) */
-  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  min-height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
-  margin: 0; /* Elimina el margen por defecto del body */
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Fuente formal */
+  background-image: url("https://enelsubte.com/wp-content/uploads/2014/12/metrobus-9-de-julio-carteleria.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
-  /* Contenedor principal para evitar estilos globales indeseados */
 
-
-.login-container2 {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  align-items: center;
-  padding: 2rem;
-  border: 8px solid #fc0;
-  border-radius: 20px;
-  line-height: 20px;
-  width: 380px;
-  margin: 2rem ;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada para contrastar con el fondo */
-  background-color: rgba(240, 238, 238, 0.9); /* Fondo semitransparente para ver la imagen de atrás */
-}
-/* Contenedor del formulario de login */
+/* --- Estilo del contenedor principal del login --- */
 .login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2.5rem;
-  border: 1px solid #ffffff;
-  border-radius: 8px;
+  padding: 40px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   width: 380px;
-  margin: 2rem auto;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada para contrastar con el fondo */
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo semitransparente para ver la imagen de atrás */
+  max-width: 90%;
+  box-sizing: border-box; /* Asegura que el padding no aumente el ancho */
 }
 
-/* Estilo para el título */
+/* --- Estilo del título --- */
 h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 28px;
   color: #333;
-  margin-bottom: 2rem;
+  margin-bottom: 30px;
+  font-weight: 600;
 }
 
-/* Agrupación de campos del formulario */
-.form-group {
-  margin-bottom: 1.5rem;
+/* --- Estilo de los inputs y su espaciado --- */
+.login-container > div > div {
+  margin-bottom: 20px; /* Espaciado entre cada input */
   width: 100%;
 }
 
-label {
-  color: #555;
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-input {
+input[type="email"],
+input[type="password"] {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
+  font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  transition: border-color 0.3s;
+  border-radius: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
 input:focus {
   outline: none;
-  border-color: #2c3e50;
+  border-color: #007bff; /* Un color azul profesional al enfocar */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-/* Agrupación de botones */
-.button-group {
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-  justify-content: space-between;
+/* --- Estilo del texto y el enlace de "Registrarse" --- */
+.login-container h4 {
+  font-weight: 400;
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  display: inline;
 }
 
+.login-container a {
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.login-container a:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+/* --- Estilo del botón --- */
 button {
-  padding: 0.75rem 1.5rem;
-  background-color: #2c3e50;
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
   color: white;
+  background-color: #eec200; /* Un gris oscuro formal */
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
   transition: background-color 0.3s;
-  flex-grow: 1;
 }
 
 button:hover {
-  background-color: #34495e;
+  background-color: #fc9b1c;
 }
 
-/* Mensaje de error */
-.error-message {
-  color: #c0392b;
-  margin-bottom: 1rem;
+/* El segundo contenedor no tiene contenido en tu JSX, pero se puede estilizar para un futuro uso */
+.login-container2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 8px solid #fc0;
+  border-radius: 20px;
+  background-color: rgba(240, 238, 238, 0.9);
+  width: 380px;
+  margin: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-}
-
-.colorp{
-  color: #2c3e50;
-
 }
