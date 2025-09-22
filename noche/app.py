@@ -11,7 +11,7 @@ def get_db_connection():
     try:
         connection = mysql.connector.connect(
             host="localhost",
-            port=3306,
+            port=3307,
             user="nocheSegu",
             password="noche1234",
             database="nocheSegura"
@@ -90,9 +90,5 @@ def login():
     except mysql.connector.Error as err:
         return jsonify({"error": f"Error de autenticación: {err}"}), 500
 
-
-# -------------------------
-# Ejecutar la app
-# -------------------------
 if __name__ == '__main__':
     app.run(debug=True)

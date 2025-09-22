@@ -17,10 +17,23 @@ body {
   min-height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
   margin: 0; /* Elimina el margen por defecto del body */
 }
-#root {
   /* Contenedor principal para evitar estilos globales indeseados */
-}
 
+
+.login-container2 {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  padding: 2rem;
+  border: 8px solid #fc0;
+  border-radius: 20px;
+  line-height: 20px;
+  width: 380px;
+  margin: 2rem ;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada para contrastar con el fondo */
+  background-color: rgba(240, 238, 238, 0.9); /* Fondo semitransparente para ver la imagen de atrás */
+}
 /* Contenedor del formulario de login */
 .login-container {
   display: flex;
@@ -28,7 +41,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #ffffff;
   border-radius: 8px;
   width: 380px;
   margin: 2rem auto;
@@ -100,4 +113,9 @@ button:hover {
   color: #c0392b;
   margin-bottom: 1rem;
   text-align: center;
+}
+
+.colorp{
+  color: #2c3e50;
+
 }
