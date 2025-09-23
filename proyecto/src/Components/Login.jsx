@@ -1,149 +1,87 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-// Componente principal para el login y registro de usuarios.
 const Login = () => {
-  // Estados para manejar los datos del formulario y el estado de la aplicación.
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState(null);
-  const [lastLogin, setLastLogin] = useState(null);
-  // Estado que actúa como nuestra "base de datos" de usuarios en localStorage.
-  const [usersDb, setUsersDb] = useState({});
+  const [usuario, setUsuario] = useState(null);
 
-  // Efecto que se ejecuta una vez al inicio del componente para cargar datos del navegador.
-  useEffect(() => {
-    // Carga los usuarios y el estado de la sesión si ya existen en localStorage.
-    const storedUsers = localStorage.getItem("usersDb");
-    if (storedUsers) {
-      setUsersDb(JSON.parse(storedUsers));
-    }
-    const storedUserId = localStorage.getItem("userId");
-    const storedLastLogin = localStorage.getItem("lastLogin");
-
-    if (storedUserId) {
-      setIsLoggedIn(true);
-      setUserId(storedUserId);
-      setLastLogin(storedLastLogin);
-    }
-  }, []);
-
-  // Función para manejar el registro de un nuevo usuario.
-  const handleRegister = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Validaciones para campos vacíos, nombre de usuario y email duplicados.
-    if (!username || !email || !password) {
-      setError("Todos los campos son obligatorios.");
-      return;
-    }
-    if (usersDb[username]) {
-      setError("Este nombre de usuario ya existe. Elige otro.");
-      return;
-    }
-    const emailExists = Object.values(usersDb).some(
-      (user) => user.email === email
-    );
-    if (emailExists) {
-      setError("Este correo electrónico ya está registrado.");
-      return;
-    }
+    try {
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, contrasena }),
+      });
 
-    // Genera un ID numérico simple y único basado en la cantidad de usuarios.
-    const newUserId = Object.keys(usersDb).length + 1;
-    const newUser = {
-      id: newUserId.toString(),
-      email: email,
-      password: password,
-      lastLogin: null,
-    };
+      const data = await response.json();
 
-    // Actualiza la base de datos de usuarios y la guarda en localStorage.
-    const updatedUsersDb = { ...usersDb, [username]: newUser };
-    setUsersDb(updatedUsersDb);
-    localStorage.setItem("usersDb", JSON.stringify(updatedUsersDb));
-    setError("Registro exitoso. ¡Ahora puedes iniciar sesión!");
-  };
+      if (!response.ok) {
+        setError(data.error || "Error al iniciar sesión");
+        return;
+      }
 
-  // Función para manejar el inicio de sesión.
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError("");
-
-    // Busca al usuario por nombre de usuario o por email.
-    let user = usersDb[username];
-    if (!user) {
-      user = Object.values(usersDb).find((u) => u.email === email);
-    }
-
-    // Si el usuario existe y la contraseña es correcta, inicia la sesión.
-    if (user && user.password === password) {
-      setIsLoggedIn(true);
-      setUserId(user.id);
-
-      // Guarda la fecha y hora de inicio de sesión.
-      const now = new Date();
-      const formattedTime = now.toLocaleString();
-      setLastLogin(formattedTime);
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("lastLogin", formattedTime);
-    } else {
-      setError("Usuario, correo o contraseña incorrectos. 😞");
+      localStorage.setItem("usuario", JSON.stringify(data));
+      setUsuario(data);
+    } catch (err) {
+      setError("Error de conexión con el servidor");
     }
   };
 
-  // Función para cerrar la sesión y limpiar los datos de localStorage.
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserId(null);
-    setLastLogin(null);
-    localStorage.removeItem("userId");
-    localStorage.removeItem("lastLogin");
+    localStorage.removeItem("usuario");
+    setUsuario(null);
   };
 
-  // Renderizado condicional: muestra la pantalla de bienvenida o el formulario.
-  if (isLoggedIn) {
-    return <div className="login-container2"></div>;
+  if (usuario) {
+    return (
+      <div className="login-container2">
+        <h2>Bienvenido {usuario.nombre_usuario}</h2>
+        <p className="color">Correo: {usuario.email}</p>
+        <button onClick={handleLogout}>Cerrar sesión</button>
+      </div>
+    );
   }
 
   return (
     <div className="login-container">
-      <h2>Iniciar Sesion</h2>
-      <div>
+      <h2>Iniciar Sesión</h2>
+      <form onSubmit={handleLogin}>
         <div>
           <input
             type="email"
-            id="email"
             value={email}
+            placeholder="Correo electrónico"
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="Correo electronico"
           />
         </div>
         <div>
           <input
             type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            value={contrasena}
             placeholder="Contraseña"
+            onChange={(e) => setContrasena(e.target.value)}
+            required
           />
         </div>
+
+        {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
         <div>
           <h4>¿No tiene cuenta?</h4>
           <a href="">Registrarse</a>
         </div>
+
         {error && <p className="error-message">{error}</p>}
         <div className="button-group">
-          <button type="button" onClick={handleLogin}>
-            Ingresar
-          </button>
+          <button type="submit">Ingresar</button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

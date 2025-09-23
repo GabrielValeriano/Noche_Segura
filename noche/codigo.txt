@@ -1,14 +1,10 @@
 from flask import Flask, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import mysql.connector
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # habilita peticiones desde React (http://localhost:5173)
 
-# -------------------------
-# Conexión a la BD
-# -------------------------
+# Función para conectarse a la base de datos
 def get_db_connection():
     try:
         connection = mysql.connector.connect(
@@ -20,8 +16,8 @@ def get_db_connection():
         )
         return connection
     except mysql.connector.Error as err:
-        print(f"Error de conexión: {err}")
-        return None
+        return jsonify({"error": f"Error de conexión: {err}"}), 500
+
 
 # -------------------------
 # Rutas / Endpoints
@@ -31,8 +27,7 @@ def get_db_connection():
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
     connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    if not connection: return
 
     cursor = connection.cursor(dictionary=True)
     cursor.execute("SELECT usuario_id, nombre_usuario, email, fecha_registro FROM Usuarios")
@@ -40,9 +35,11 @@ def get_usuarios():
     cursor.close()
     connection.close()
     
+    # El diccionario=True hace que los datos ya vengan en formato JSON
     return jsonify(usuarios)
 
-# POST: crear un usuario (hash de contraseña + validación email duplicado)
+
+# POST: crear un usuario (hash de contraseña)
 @app.route('/usuarios', methods=['POST'])
 def crear_usuario():
     data = request.get_json()
@@ -54,25 +51,19 @@ def crear_usuario():
     contraseña_hash = generate_password_hash(data['contrasena'])
 
     connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    if not connection: return
 
-    cursor = connection.cursor(dictionary=True)
-
-    # Verificar si el correo ya existe
-    cursor.execute("SELECT email FROM Usuarios WHERE email = %s", (email,))
-    if cursor.fetchone():
-        cursor.close()
-        connection.close()
-        return jsonify({"error": "El correo ya está registrado"}), 400
-
+    cursor = connection.cursor()
     sql = "INSERT INTO Usuarios (nombre_usuario, email, contraseña_hash) VALUES (%s, %s, %s)"
     val = (nombre_usuario, email, contraseña_hash)
-
+    
     try:
         cursor.execute(sql, val)
         connection.commit()
+        
+        # Opcional: obtener el ID del usuario recién creado
         usuario_id = cursor.lastrowid
+        
         cursor.close()
         connection.close()
 
@@ -84,14 +75,14 @@ def crear_usuario():
     except mysql.connector.Error as err:
         return jsonify({"error": f"Error al crear usuario: {err}"}), 500
 
+
 # PUT: actualizar usuario
 @app.route('/usuarios/<int:id>', methods=['PUT'])
 def actualizar_usuario(id):
     data = request.get_json()
     
     connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    if not connection: return
 
     cursor = connection.cursor()
     
@@ -124,8 +115,7 @@ def actualizar_usuario(id):
 @app.route('/usuarios/<int:id>', methods=['DELETE'])
 def eliminar_usuario(id):
     connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    if not connection: return
     
     cursor = connection.cursor()
     sql = "DELETE FROM Usuarios WHERE usuario_id = %s"
@@ -140,38 +130,6 @@ def eliminar_usuario(id):
     except mysql.connector.Error as err:
         return jsonify({"error": f"Error al eliminar: {err}"}), 500
 
-# POST: login de usuario
-@app.route('/login', methods=['POST'])
-def login_usuario():
-    data = request.get_json()
-    if not all(k in data for k in ("email", "contrasena")):
-        return jsonify({"error": "Faltan datos"}), 400
-
-    email = data['email']
-    contrasena = data['contrasena']
-
-    connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
-
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT usuario_id, nombre_usuario, email, contraseña_hash FROM Usuarios WHERE email = %s", (email,))
-    user = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    if not user:
-        return jsonify({"error": "El correo no está registrado"}), 401
-
-    if not check_password_hash(user['contraseña_hash'], contrasena):
-        return jsonify({"error": "Contraseña incorrecta"}), 401
-
-    return jsonify({
-        "mensaje": "Login exitoso",
-        "usuario_id": user['usuario_id'],
-        "nombre_usuario": user['nombre_usuario'],
-        "email": user['email']
-    }), 200
 
 # -------------------------
 # Ejecutar la app

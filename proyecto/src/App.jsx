@@ -10,13 +10,7 @@ function App() {
   const handleLogout = () => setShowMenu(false);
 
   return (
-    <div className="App">
-      {!showMenu ? (
-        <Login onContinue={handleContinue} />
-      ) : (
-        <Menu onLogout={handleLogout} />
-      )}
-    </div>
+    <Login></Login>
   );
 }
 
