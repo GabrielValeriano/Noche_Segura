@@ -1,0 +1,37 @@
+.dashboard-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  padding: 15px 30px;
+}
+
+.dashboard-banner .banner-right a {
+  margin-right: 20px;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.dashboard-banner .banner-right a:hover {
+  text-decoration: underline;
+}
+
+.dashboard-banner .banner-right button {
+  background-color: #d9534f;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.dashboard-banner .banner-right button:hover {
+  background-color: #c9302c;
+}
+
+.dashboard-content {
+  padding: 30px;
+  font-family: Arial, sans-serif;
+}

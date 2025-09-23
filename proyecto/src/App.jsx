@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Components/Login";
-import Menu from "./Components/Menu/Menu";
+import Register from "./Components/Register";
+import Dashboard from "./Components/Dashboard";
 
 function App() {
-  const [showMenu, setShowMenu] = useState(false);
-
-  const handleContinue = () => setShowMenu(true);
-  const handleLogout = () => setShowMenu(false);
-
   return (
-    <Login></Login>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 

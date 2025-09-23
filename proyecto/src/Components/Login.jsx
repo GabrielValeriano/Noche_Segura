@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./Login.css"; // importamos los estilos
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,8 +27,9 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem("usuario", JSON.stringify(data));
-      setUsuario(data);
+    localStorage.setItem("usuario", JSON.stringify(data));
+    window.location.href = "/Dashboard"; // redirige al dashboard
+
     } catch (err) {
       setError("Error de conexión con el servidor");
     }
@@ -74,7 +76,7 @@ const Login = () => {
         {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
         <div>
           <h4>¿No tiene cuenta?</h4>
-          <a href="">Registrarse</a>
+          <a href="/Register">Registrarse</a>
         </div>
 
         {error && <p className="error-message">{error}</p>}

@@ -42,7 +42,7 @@ def get_usuarios():
     
     return jsonify(usuarios)
 
-# POST: crear un usuario (hash de contraseña + validación email duplicado)
+# POST: crear un usuario (hash de contraseña)
 @app.route('/usuarios', methods=['POST'])
 def crear_usuario():
     data = request.get_json()
@@ -54,18 +54,20 @@ def crear_usuario():
     contraseña_hash = generate_password_hash(data['contrasena'])
 
     connection = get_db_connection()
-    if not connection:
-        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    if not connection: 
+        return
 
     cursor = connection.cursor(dictionary=True)
 
-    # Verificar si el correo ya existe
-    cursor.execute("SELECT email FROM Usuarios WHERE email = %s", (email,))
-    if cursor.fetchone():
+    # --- VALIDACIÓN: usuario o email duplicado ---
+    cursor.execute("SELECT * FROM Usuarios WHERE nombre_usuario = %s OR email = %s", (nombre_usuario, email))
+    existing_user = cursor.fetchone()
+    if existing_user:
         cursor.close()
         connection.close()
-        return jsonify({"error": "El correo ya está registrado"}), 400
+        return jsonify({"error": "El nombre de usuario o email ya está registrado"}), 400
 
+    # --- INSERTAR NUEVO USUARIO ---
     sql = "INSERT INTO Usuarios (nombre_usuario, email, contraseña_hash) VALUES (%s, %s, %s)"
     val = (nombre_usuario, email, contraseña_hash)
 
@@ -82,8 +84,10 @@ def crear_usuario():
             "email": email
         }), 201
     except mysql.connector.Error as err:
+        cursor.close()
+        connection.close()
         return jsonify({"error": f"Error al crear usuario: {err}"}), 500
-
+    
 # PUT: actualizar usuario
 @app.route('/usuarios/<int:id>', methods=['PUT'])
 def actualizar_usuario(id):
