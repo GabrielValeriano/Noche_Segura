@@ -76,7 +76,7 @@ const Login = () => {
         {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
         <div>
           <h4>¿No tiene cuenta?</h4>
-          <a href="/Register">Registrarse</a>
+          <a href="/Register">hola</a>
         </div>
 
         {error && <p className="error-message">{error}</p>}
