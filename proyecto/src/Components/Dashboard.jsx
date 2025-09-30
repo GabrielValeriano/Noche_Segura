@@ -1,39 +1,42 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import "./Dashboard.css"; // CSS para el banner
+// src/pages/Dashboard.jsx
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import "./Dashboard.css";
 
-const Dashboard = () => {
-  const [usuario, setUsuario] = useState(
-    JSON.parse(localStorage.getItem("usuario"))
-  );
+export default function Dashboard() {
+  const [geoData, setGeoData] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("usuario");
-    window.location.href = "/"; // vuelve al login
+  // Cargar el archivo GeoJSON desde /public/data/
+  useEffect(() => {
+    fetch("/data/caminos-reserva.geojson")
+      .then((response) => response.json())
+      .then((data) => setGeoData(data))
+      .catch((err) => console.error("Error cargando GeoJSON:", err));
+  }, []);
+
+  // Estilo para los caminos
+  const estiloCaminos = {
+    color: "red",
+    weight: 3,
+    dashArray: "5, 5", // punteado
   };
 
   return (
-    <div className="dashboard-container">
-      {/* BANNER SUPERIOR */}
-      <header className="dashboard-banner">
-        <div className="banner-left">
-          <h3>Bienvenido, {usuario.nombre_usuario}</h3>
-        </div>
-        <div className="banner-right">
-          <Link to="/opcion1">Opción 1</Link>
-          <Link to="/opcion2">Opción 2</Link>
-          <Link to="/opcion3">Opción 3</Link>
-          <button onClick={handleLogout}>Cerrar sesión</button>
-        </div>
-      </header>
+    <div className="dashboard">
+      <MapContainer
+        center={[-34.679750, -58.458611]} // Reserva Costanera Norte
+        zoom={15}
+        className="map"
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+        />
 
-      {/* CONTENIDO PRINCIPAL */}
-      <main className="dashboard-content">
-        <h2>Panel principal</h2>
-        <p>Seleccioná una opción del banner para navegar.</p>
-      </main>
+        {/* Renderizar GeoJSON cuando esté cargado */}
+        {geoData && <GeoJSON data={geoData} style={estiloCaminos} />}
+      </MapContainer>
     </div>
   );
-};
-
-export default Dashboard;
+}

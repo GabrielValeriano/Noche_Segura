@@ -8,6 +8,11 @@ body {
  margin: 0;
  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente formal */
 
+ background-image: url('https://enelsubte.com/wp-content/uploads/2014/12/metrobus-9-de-julio-carteleria.jpg');
+ background-size: cover;
+ background-position: center;
+ background-repeat: no-repeat;
+ background-attachment: fixed; 
 }
 
 
