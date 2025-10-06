@@ -17,15 +17,15 @@ export default function Dashboard() {
 
   // Estilo para los caminos
   const estiloCaminos = {
-    color: "red",
+    color: "orange",
     weight: 3,
-    dashArray: "5, 5", // punteado
+    dashArray: "4.5, 4.5", // punteado
   };
 
   return (
     <div className="dashboard">
       <MapContainer
-        center={[-34.679750, -58.458611]} // Reserva Costanera Norte
+        center={[-34.67975, -58.458611]} // Reserva Costanera Norte
         zoom={15}
         className="map"
       >
