@@ -1,5 +1,5 @@
 /* --- Estilos del body para el fondo y la tipografía --- */
-body {
+body{
  display: flex;
  flex-direction: column;
  align-items: center;

@@ -1,8 +1,12 @@
+/* ---------------------------------------------------- */
+/* 1. Layout Base (Mantiene Mapa Fullscreen) */
+/* ---------------------------------------------------- */
+
 /* Hace que el contenedor ocupe toda la pantalla */
 .dashboard {
   height: 100vh;
   width: 100vw;
-  position: relative;
+  position: relative; /* Clave para posicionar el sidebar absolutamente */
 }
 
 /* Hace que el mapa ocupe todo el contenedor */
@@ -11,21 +15,64 @@
   width: 100%;
 }
 
-/* Botón flotante encima del mapa */
-.map-button {
+/* ---------------------------------------------------- */
+/* 2. Banner Lateral Flotante (Sidebar) - AJUSTADO */
+/* ---------------------------------------------------- */
+
+.sidebar {
+  /* Posicionamiento Absoluto sobre el mapa (se mantiene) */
   position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  font-size: 14px;
-  border: none;
+  top: 15px;
+  left: 15px;
+
+  width: 200px;
+  padding: 10px;
+  background-color: white;
   border-radius: 6px;
-  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+
+  /* Estilos internos */
+  font-family: Arial, sans-serif;
+  /* 🚨 NUEVO: Alineación general del texto a la izquierda */
+  text-align: left; 
 }
 
-.map-button:hover {
-  background-color: #0056b3;
+.sidebar h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #333;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+  /* El texto de h3 ya estará alineado por el "text-align: left" del sidebar */
+}
+
+/* ---------------------------------------------------- */
+/* 3. Estilo del Botón de Zona (Comuna 8) - AJUSTADO */
+/* ---------------------------------------------------- */
+
+.zona-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  /* 🚨 CLAVE: Asegura que el texto dentro del botón esté a la izquierda */
+  text-align: left; 
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #00458C;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.zona-btn:hover {
+  background-color: #052377c7;
+}
+
+.zona-btn.active {
+  background-color: #00458C;
+  color: white;
+  border-color: #00458C;
+  font-weight: bold;
 }
