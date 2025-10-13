@@ -7,9 +7,9 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # habilita peticiones desde React (http://localhost:5173)
 
-# -------------------------
-# Conexión a la BD
-# -------------------------
+
+# Conexión a la Base Datos
+
 def get_db_connection():
     try:
         connection = mysql.connector.connect(
@@ -24,11 +24,11 @@ def get_db_connection():
         print(f"Error de conexión: {err}")
         return None
 
-# -------------------------
-# Rutas / Endpoints
-# -------------------------
 
-# GET: obtener todos los usuarios
+# Rutas
+
+
+# GET Da todos los usuarios
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
     connection = get_db_connection()
@@ -60,7 +60,7 @@ def crear_usuario():
 
     cursor = connection.cursor(dictionary=True)
 
-    # --- VALIDACIÓN: usuario o email duplicado ---
+    # ¿ usuario o email duplicado ?
     cursor.execute("SELECT * FROM Usuarios WHERE nombre_usuario = %s OR email = %s", (nombre_usuario, email))
     existing_user = cursor.fetchone()
     if existing_user:
@@ -68,7 +68,7 @@ def crear_usuario():
         connection.close()
         return jsonify({"error": "El nombre de usuario o email ya está registrado"}), 400
 
-    # --- INSERTAR NUEVO USUARIO ---
+    #Inserta un nuevo usuario
     sql = "INSERT INTO Usuarios (nombre_usuario, email, contraseña_hash) VALUES (%s, %s, %s)"
     val = (nombre_usuario, email, contraseña_hash)
 
@@ -89,7 +89,7 @@ def crear_usuario():
         connection.close()
         return jsonify({"error": f"Error al crear usuario: {err}"}), 500
     
-# PUT: actualizar usuario
+# PUT actualizar usuario
 @app.route('/usuarios/<int:id>', methods=['PUT'])
 def actualizar_usuario(id):
     data = request.get_json()
@@ -125,7 +125,7 @@ def actualizar_usuario(id):
     except mysql.connector.Error as err:
         return jsonify({"error": f"Error al actualizar: {err}"}), 500
 
-# DELETE: eliminar usuario
+# DELETE elimina los usuario
 @app.route('/usuarios/<int:id>', methods=['DELETE'])
 def eliminar_usuario(id):
     connection = get_db_connection()
@@ -145,7 +145,7 @@ def eliminar_usuario(id):
     except mysql.connector.Error as err:
         return jsonify({"error": f"Error al eliminar: {err}"}), 500
 
-# POST: login de usuario
+# POST login de usuario
 @app.route('/login', methods=['POST'])
 def login_usuario():
     data = request.get_json()
@@ -178,8 +178,8 @@ def login_usuario():
         "email": user['email']
     }), 200
 
-# -------------------------
-# Ejecutar la app
-# -------------------------
+
+#Ejecutar la app
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -19,7 +19,8 @@ export default function Dashboard() {
 
   // Cargar zonas disponibles (ejemplo: comuna 8)
   const zonasDisponibles = {
-    "Comuna 8": "/data2/comuna8.geojson"
+    "Comuna 8": "/data2/comuna8.geojson",
+    Caballito: "/data2/caballito.geojson",
   };
 
   const manejarSeleccionZona = (nombreZona) => {
@@ -68,7 +69,7 @@ export default function Dashboard() {
         center={[-34.68, -58.46]} // Parque de la Ciudad
         zoom={14}
         className="map"
-        zoomControl={false} 
+        zoomControl={false}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
