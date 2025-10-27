@@ -3,9 +3,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 import os
 from flask_cors import CORS
+import json
 
 app = Flask(__name__)
-CORS(app)  # habilita peticiones desde React (http://localhost:5173)
+CORS(app) # habilita peticiones desde React (http://localhost:5173)
 
 
 # Conexión a la Base Datos
@@ -25,8 +26,54 @@ def get_db_connection():
         return None
 
 
-# Rutas
+# ===============================================
+# NUEVA RUTA: Obtener niveles de seguridad por zona
+# ===============================================
+@app.route('/niveles_seguridad_zonas', methods=['GET'])
+def get_niveles_seguridad_zonas():
+    """
+    Retorna el nivel de seguridad (nivel_id) para las zonas de interés.
+    Utiliza la tabla: ZonasDeSeguridad con columnas: nombre y nivel_id.
+    Retorna: {"Comuna 8": 1, "Caballito": 3, ...}
+    """
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
 
+    cursor = connection.cursor(dictionary=True)
+    
+    # Zonas que el frontend espera (React)
+    zonas_de_interes = ["Comuna 8", "Caballito", "Puerto Madero"]
+    
+    try:
+        # Construimos la cláusula IN dinámicamente: (%s, %s, %s)
+        placeholders = ', '.join(['%s'] * len(zonas_de_interes))
+        
+        # **AJUSTE DE TABLA Y COLUMNAS:**
+        # Se usa ZonasDeSeguridad y las columnas 'nombre' y 'nivel_id'.
+        sql = f"SELECT nombre, nivel_id FROM ZonasDeSeguridad WHERE nombre IN ({placeholders})"
+        
+        cursor.execute(sql, tuple(zonas_de_interes))
+        zonas_niveles = cursor.fetchall()
+        
+    except mysql.connector.Error as err:
+        cursor.close()
+        connection.close()
+        # Mensaje de error más descriptivo
+        return jsonify({"error": f"Error al consultar niveles. Verifique la tabla 'ZonasDeSeguridad' y las columnas 'nombre' y 'nivel_id'. Detalle: {err}"}), 500
+    
+    cursor.close()
+    connection.close()
+
+    # Formatear la respuesta como un diccionario: {nombre_zona: nivel_id}
+    # Se usa 'nombre' como clave del diccionario de respuesta
+    niveles_map = {zona['nombre']: zona['nivel_id'] for zona in zonas_niveles}
+    
+    # Si todo va bien, se retorna el mapeo.
+    return jsonify(niveles_map)
+
+
+# Rutas de Usuarios (Sin cambios)
 
 # GET Da todos los usuarios
 @app.route('/usuarios', methods=['GET'])
@@ -56,7 +103,7 @@ def crear_usuario():
 
     connection = get_db_connection()
     if not connection: 
-        return
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
 
     cursor = connection.cursor(dictionary=True)
 
@@ -178,9 +225,55 @@ def login_usuario():
         "email": user['email']
     }), 200
 
+def cargar_poligonos_desde_archivos(geojson_folder='data2'):
+    """
+    Lee archivos GeoJSON de una carpeta y actualiza la columna poligono_geografico 
+    en la tabla ZonasDeSeguridad.
+    """
+    # **IMPORTANTE:** Ajusta la ruta y el nombre del archivo si es necesario.
+    # Asume que tienes una carpeta 'geojson_data' junto a app.py
+    GEOJSON_MAP = {
+        "Comuna 8": os.path.join(geojson_folder, "comuna8.geojson"),
+        "Caballito": os.path.join(geojson_folder, "caballito.geojson"),
+        "Puerto Madero": os.path.join(geojson_folder, "PuertoMadero.geojson"),
+    }
+    
+    connection = get_db_connection()
+    if not connection:
+        print("Fallo la conexión a la DB, no se cargaron polígonos.")
+        return
+
+    cursor = connection.cursor()
+    print("Iniciando carga de polígonos en la base de datos...")
+
+    for nombre_zona, ruta_archivo in GEOJSON_MAP.items():
+        try:
+            # 1. Leer el archivo GeoJSON (el contenido completo)
+            with open(ruta_archivo, 'r', encoding='utf-8') as f:
+                geojson_data = json.load(f)
+            
+            # 2. Convertir el JSON (diccionario de Python) a un string para almacenar en MySQL
+            geojson_string = json.dumps(geojson_data) 
+
+            # 3. Actualizar la base de datos
+            sql = "UPDATE ZonasDeSeguridad SET poligono_geografico = %s WHERE nombre = %s"
+            val = (geojson_string, nombre_zona)
+            
+            cursor.execute(sql, val)
+            print(f"Polígono para '{nombre_zona}' cargado correctamente.")
+
+        except FileNotFoundError:
+            print(f"ADVERTENCIA: Archivo NO ENCONTRADO para '{nombre_zona}'. Buscando en: {ruta_archivo}")
+        except Exception as e:
+            print(f"ERROR al procesar '{nombre_zona}': {e}")
+            
+    connection.commit()
+    cursor.close()
+    connection.close()
+    print("Carga de polígonos finalizada y guardada en la base de datos.")
 
 #Ejecutar la app
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    # Usamos host='0.0.0.0' para que sea accesible desde el frontend de React
+    app.run(debug=True, host='0.0.0.0')
