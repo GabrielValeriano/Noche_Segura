@@ -7,6 +7,34 @@ import "./Dashboard.css";
 // URL base de tu backend Flask
 const FLASK_API_BASE_URL = "http://localhost:5000";
 
+// Icono para las paradas
+const iconoParada = L.icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/201/201818.png",
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -25],
+});
+
+export default function Dashboard() {
+  const [paradas, setParadas] = useState([]);
+  const [zonasDisponibles, setZonasDisponibles] = useState({});
+  const [zonasNivelesDB, setZonasNivelesDB] = useState(null);
+  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
+  const [zonaData, setZonaData] = useState(null);
+  const [caminosData, setCaminosData] = useState(null);
+  const [caminosVisibles, setCaminosVisibles] = useState({});
+}
+
+  // -----------------------------
+  // 1️⃣ Cargar paradas
+  // -----------------------------
+  useEffect(() => {
+    fetch(`${FLASK_API_BASE_URL}/paradas`)
+      .then(res => res.json())
+      .then(data => setParadas(data))
+      .catch(err => console.error("Error cargando paradas:", err));
+  }, []);
+
 // ----------------------------------------------------
 // Mapeo de Niveles de Seguridad a Estilos (Colores)
 // ----------------------------------------------------
@@ -34,20 +62,20 @@ const estilosPorNivel = {
   },
 };
 
-// Definición inicial estática de zonas (URLs y nombres)
+// Definición inicial estática de zonas (Solo mantenemos URLs de Caminos)
 const ZONAS_ESTATICAS = {
   "Comuna 8": {
-    zonaUrl: "/data2/comuna8.geojson",
+    // zonaUrl ELIMINADO
     caminosUrl: "/data/caminos-parquedelaCiudad.geojson",
     caminosNombre: "Parque de la Ciudad",
   },
   Caballito: {
-    zonaUrl: "/data2/caballito.geojson",
+    // zonaUrl ELIMINADO
     caminosUrl: "/data/caminos-Caballito.geojson",
     caminosNombre: "Parque Centenario",
   },
   "Puerto Madero": {
-    zonaUrl: "/data2/PuertoMadero.geojson",
+    // zonaUrl ELIMINADO
     caminosUrl: "/data/caminos-PuertoMadero.geojson",
     caminosNombre: "Puente de la Mujer",
   },
@@ -101,15 +129,14 @@ export default function Dashboard() {
           throw new Error("Error al obtener niveles de seguridad del backend");
         }
         const data = await response.json();
-        // data esperada: {"Comuna 8": 1, "Caballito": 3, "Puerto Madero": 2}
         setZonasNivelesDB(data);
       } catch (error) {
         console.error("Fallo la carga de niveles desde Flask:", error);
-        setZonasNivelesDB({}); // Dejar vacío para renderizar solo zonas estáticas sin color dinámico
+        setZonasNivelesDB({});
       }
     }
     fetchNiveles();
-  }, []); // Se ejecuta una sola vez al montar el componente
+  }, []);
 
   // -----------------------------------------------------------------
   // EFECTO 2: Combina datos estáticos con estilos dinámicos de la BD
@@ -118,22 +145,20 @@ export default function Dashboard() {
     if (zonasNivelesDB) {
       const zonasConEstilo = {};
 
-      // Itera sobre las zonas estáticas y les asigna su estilo basado en la BD
       Object.keys(ZONAS_ESTATICAS).forEach((nombre) => {
-        const nivelId = zonasNivelesDB[nombre]; // Obtiene el nivel (ej: 1, 2, 3)
+        const nivelId = zonasNivelesDB[nombre];
         const estilo = nivelId ? estilosPorNivel[nivelId] : null;
 
         zonasConEstilo[nombre] = {
           ...ZONAS_ESTATICAS[nombre],
-          nivel_id: nivelId, // Guardamos el nivel ID para mostrarlo
-          // Asigna el estilo basado en la BD, o un color por defecto (Nivel 1) si no hay nivel
+          nivel_id: nivelId,
           estilos: estilo || estilosPorNivel[1],
         };
       });
 
       setZonasDisponibles(zonasConEstilo);
     }
-  }, [zonasNivelesDB]); // Se ejecuta cuando los niveles de la BD llegan
+  }, [zonasNivelesDB]);
 
   // Lógica principal: Cargar / Borrar / Cambiar ZONA
   const manejarSeleccionZona = (nombreZona) => {
@@ -143,28 +168,45 @@ export default function Dashboard() {
       setZonaData(null);
       setCaminosData(null);
       setEstiloZonaSeleccionada(null);
+
+      setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: false }));
     } else {
-      // Selecciona nueva zona
+      // 1. Pre-limpieza y establecimiento de zona
       setZonaData(null);
       setCaminosData(null);
       setZonaSeleccionada(nombreZona);
 
-      // 1. OBTENEMOS EL OBJETO DE ESTILOS YA CREADO POR EL EFECTO
-      const zonaInfo = zonasDisponibles[nombreZona];
-      setEstiloZonaSeleccionada(zonaInfo.estilos); // Guardamos el nuevo estilo
+      setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: false }));
 
-      // 2. Cargamos los datos de la zona
-      fetch(zonaInfo.zonaUrl)
+      // 2. OBTENEMOS EL OBJETO DE ESTILOS YA CREADO POR EL EFECTO
+      const zonaInfo = zonasDisponibles[nombreZona];
+      setEstiloZonaSeleccionada(zonaInfo.estilos);
+
+      // 3. 💥 Carga los datos de la zona COMPLETA (incluyendo GeoJSON) desde Flask
+      fetch(`${FLASK_API_BASE_URL}/zona/${nombreZona}`)
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Error al cargar la zona: " + response.statusText);
+            throw new Error(
+              "Error al cargar la zona desde Flask: " + response.statusText
+            );
           }
           return response.json();
         })
-        .then((data) => setZonaData(data)) // Al cambiar zonaData, MapZoomer hace zoom
+        .then((data) => {
+          // data.poligrafo_geojson contiene el GeoJSON que necesita Leaflet
+          if (data && data.poligrafo_geojson) {
+            setZonaData(data.poligrafo_geojson); // Establece la geometría GeoJSON
+          } else {
+            console.error(
+              "Error: El backend no devolvió la geometría (poligrafo_geojson)."
+            );
+            setZonaData(null);
+            setEstiloZonaSeleccionada(null);
+          }
+        })
         .catch((err) => {
-          console.error("Error cargando GeoJSON de zona:", err);
-          setEstiloZonaSeleccionada(null); // Limpiamos estilo si falla
+          console.error("Error cargando GeoJSON de zona desde Flask:", err);
+          setEstiloZonaSeleccionada(null);
           if (zonaSeleccionada === nombreZona) {
             setZonaSeleccionada(null);
           }
@@ -181,6 +223,7 @@ export default function Dashboard() {
       setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: false }));
       setCaminosData(null);
     } else {
+      // NOTA: Los caminos (caminosUrl) siguen apuntando a archivos estáticos locales.
       fetch(caminosUrl)
         .then((response) => response.json())
         .then((data) => {
@@ -193,7 +236,7 @@ export default function Dashboard() {
     }
   };
 
-  // Estilo de caminos (General, no cambia)
+  // Estilo de caminos 
   const estiloCaminos = {
     color: "orange",
     weight: 3,
@@ -220,8 +263,8 @@ export default function Dashboard() {
                 }`}
                 onClick={() => manejarSeleccionZona(nombre)}
               >
+                {/* Texto Zona */}
                 {nombre}
-                {/* Muestra el nivel de seguridad si está disponible */}
                 {zonasDisponibles[nombre].nivel_id && ``}
               </button>
 
@@ -231,9 +274,8 @@ export default function Dashboard() {
                   className="caminos-btn"
                   onClick={() => manejarVisibilidadCaminos(nombre)}
                 >
-                  {caminosVisibles[nombre]
-                    ? ` ${zonasDisponibles[nombre].caminosNombre}`
-                    : ` ${zonasDisponibles[nombre].caminosNombre}`}
+                  {/* Texto Caminos */}
+                  {zonasDisponibles[nombre].caminosNombre}
                 </button>
               )}
             </div>
@@ -260,7 +302,21 @@ export default function Dashboard() {
         {/* Zona seleccionada: USA EL ESTILO DINÁMICO */}
         {zonaData && estiloZonaSeleccionada && (
           <GeoJSON data={zonaData} style={estiloZonaSeleccionada} />
-        )}
+        )
+        {/* Paradas */}
+        {paradas.map(parada => (
+          <Marker
+            key={parada.parada_id}
+            position={[parada.latitud, parada.longitud]}
+            icon={iconoParada}
+          >
+            <Popup>
+              <strong>{parada.nombre_calle}</strong>
+              <br />
+              Líneas: {parada.lineas?.length ? parada.lineas.join(", ") : "No registradas"}
+            </Popup>
+          </Marker>
+        }
       </MapContainer>
     </div>
   );

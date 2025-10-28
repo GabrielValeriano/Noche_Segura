@@ -72,6 +72,91 @@ def get_niveles_seguridad_zonas():
     # Si todo va bien, se retorna el mapeo.
     return jsonify(niveles_map)
 
+# ===============================================
+# RUTA 2: OBTENER DATA COMPLETA DE ZONA (INCLUYE GEOMETRÍA)
+# ===============================================
+@app.route('/zona/<nombre_zona>', methods=['GET'])
+def get_zona_data(nombre_zona):
+    """
+    Retorna toda la información de una zona, incluyendo el GeoJSON (poligono_geografico).
+    """
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+
+    cursor = connection.cursor(dictionary=True)
+    
+    try:
+        # Recuperamos todas las columnas necesarias, incluyendo el polígono como texto
+        sql = "SELECT zona_id, nombre, descripcion, nivel_id, poligono_geografico FROM ZonasDeSeguridad WHERE nombre = %s"
+        
+        cursor.execute(sql, (nombre_zona,))
+        zona_data = cursor.fetchone()
+        
+        if not zona_data:
+            return jsonify({"error": "Zona no encontrada"}), 404
+
+        # El campo poligono_geografico es un string (GeoJSON). 
+        # Lo convertimos de nuevo a un objeto JSON para incluirlo en la respuesta.
+        if zona_data['poligono_geografico']:
+            zona_data['poligrafo_geojson'] = json.loads(zona_data['poligono_geografico'])
+        else:
+            zona_data['poligrafo_geojson'] = None
+        
+        # Eliminamos el string largo original si ya convertimos el objeto
+        del zona_data['poligono_geografico']
+            
+    except mysql.connector.Error as err:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": f"Error al consultar la zona: {err}"}), 500
+    except json.JSONDecodeError:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": "Error al decodificar el GeoJSON de la base de datos"}), 500
+    
+    cursor.close()
+    connection.close()
+
+    # Retorna todos los datos, incluido el GeoJSON ya como objeto
+    return jsonify(zona_data)
+
+# -----------------------
+# Endpoint de paradas con líneas
+# -----------------------
+@app.route('/paradas', methods=['GET'])
+def get_paradas_con_lineas():
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+    cursor = connection.cursor(dictionary=True)
+    query = """
+        SELECT p.parada_id, p.latitud, p.longitud, p.nombre_calle, p.nivel_id, l.linea
+        FROM ParadasDeColectivo p
+        LEFT JOIN LineasPorParada l ON p.parada_id = l.parada_id
+        ORDER BY p.parada_id
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    connection.close()
+
+    # Agrupar líneas por parada
+    paradas = {}
+    for row in rows:
+        pid = row['parada_id']
+        if pid not in paradas:
+            paradas[pid] = {
+                "parada_id": pid,
+                "latitud": row['latitud'],
+                "longitud": row['longitud'],
+                "nombre_calle": row['nombre_calle'],
+                "nivel_id": row['nivel_id'],
+                "lineas": []
+            }
+        if row['linea']:
+            paradas[pid]["lineas"].append(row['linea'])
+
+    return jsonify(list(paradas.values()))
 
 # Rutas de Usuarios (Sin cambios)
 
@@ -224,53 +309,6 @@ def login_usuario():
         "nombre_usuario": user['nombre_usuario'],
         "email": user['email']
     }), 200
-
-def cargar_poligonos_desde_archivos(geojson_folder='data2'):
-    """
-    Lee archivos GeoJSON de una carpeta y actualiza la columna poligono_geografico 
-    en la tabla ZonasDeSeguridad.
-    """
-    # **IMPORTANTE:** Ajusta la ruta y el nombre del archivo si es necesario.
-    # Asume que tienes una carpeta 'geojson_data' junto a app.py
-    GEOJSON_MAP = {
-        "Comuna 8": os.path.join(geojson_folder, "comuna8.geojson"),
-        "Caballito": os.path.join(geojson_folder, "caballito.geojson"),
-        "Puerto Madero": os.path.join(geojson_folder, "PuertoMadero.geojson"),
-    }
-    
-    connection = get_db_connection()
-    if not connection:
-        print("Fallo la conexión a la DB, no se cargaron polígonos.")
-        return
-
-    cursor = connection.cursor()
-    print("Iniciando carga de polígonos en la base de datos...")
-
-    for nombre_zona, ruta_archivo in GEOJSON_MAP.items():
-        try:
-            # 1. Leer el archivo GeoJSON (el contenido completo)
-            with open(ruta_archivo, 'r', encoding='utf-8') as f:
-                geojson_data = json.load(f)
-            
-            # 2. Convertir el JSON (diccionario de Python) a un string para almacenar en MySQL
-            geojson_string = json.dumps(geojson_data) 
-
-            # 3. Actualizar la base de datos
-            sql = "UPDATE ZonasDeSeguridad SET poligono_geografico = %s WHERE nombre = %s"
-            val = (geojson_string, nombre_zona)
-            
-            cursor.execute(sql, val)
-            print(f"Polígono para '{nombre_zona}' cargado correctamente.")
-
-        except FileNotFoundError:
-            print(f"ADVERTENCIA: Archivo NO ENCONTRADO para '{nombre_zona}'. Buscando en: {ruta_archivo}")
-        except Exception as e:
-            print(f"ERROR al procesar '{nombre_zona}': {e}")
-            
-    connection.commit()
-    cursor.close()
-    connection.close()
-    print("Carga de polígonos finalizada y guardada en la base de datos.")
 
 #Ejecutar la app
 
