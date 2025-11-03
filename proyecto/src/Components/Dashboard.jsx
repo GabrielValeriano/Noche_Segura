@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap, Marker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  GeoJSON,
+  useMap,
+  Marker,
+  Popup,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./Dashboard.css";
@@ -45,30 +52,34 @@ const estilosPorNivel = {
 // Definición inicial estática de zonas (Solo mantenemos URLs de Caminos)
 const ZONAS_ESTATICAS = {
   "Comuna 8": {
-    // zonaUrl ELIMINADO
-    caminosUrl: "/data/caminos-parquedelaCiudad.geojson",
     caminosNombre: "Parque de la Ciudad",
   },
   Caballito: {
-    // zonaUrl ELIMINADO
-    caminosUrl: "/data/caminos-Caballito.geojson",
     caminosNombre: "Parque Centenario",
   },
   "Puerto Madero": {
-    // zonaUrl ELIMINADO
-    caminosUrl: "/data/caminos-PuertoMadero.geojson",
-    caminosNombre: "Puente de la Mujer",
+    caminosNombre: "Reserva Ecologica",
   },
 };
 
 // ----------------------------------------------------
 // Componente para ajustar la vista del mapa (Zoom)
 // ----------------------------------------------------
-function MapZoomer({ zonaData }) {
+function MapZoomer({ zonaData, caminosData }) {
   const map = useMap();
 
   useEffect(() => {
-    if (zonaData) {
+    // 1. Prioriza el zoom en los caminos si están activos
+    if (caminosData) {
+      const geoJsonLayer = L.geoJson(caminosData);
+      const bounds = geoJsonLayer.getBounds();
+
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }
+    // 2. Si no hay caminos, haz zoom en la zona (comportamiento original)
+    else if (zonaData) {
       const geoJsonLayer = L.geoJson(zonaData);
       const bounds = geoJsonLayer.getBounds();
 
@@ -76,12 +87,11 @@ function MapZoomer({ zonaData }) {
         map.fitBounds(bounds, { padding: [50, 50] });
       }
     }
-  }, [zonaData, map]);
+  }, [zonaData, caminosData, map]); // Asegúrate de incluir caminosData en las dependencias
 
   return null;
 }
 // ----------------------------------------------------
-
 
 export default function Dashboard() {
   // ESTADOS MOVIDOS DENTRO DE LA FUNCIÓN
@@ -94,17 +104,15 @@ export default function Dashboard() {
   const [caminosVisibles, setCaminosVisibles] = useState({});
   const [estiloZonaSeleccionada, setEstiloZonaSeleccionada] = useState(null);
 
-
   // -----------------------------
   // 1️⃣ Cargar paradas (MOVIDO Y CORREGIDO)
   // -----------------------------
   useEffect(() => {
     fetch(`${FLASK_API_BASE_URL}/paradas`)
-      .then(res => res.json())
-      .then(data => setParadas(data))
-      .catch(err => console.error("Error cargando paradas:", err));
+      .then((res) => res.json())
+      .then((data) => setParadas(data))
+      .catch((err) => console.error("Error cargando paradas:", err));
   }, []);
-
 
   // -----------------------------------------------------------------
   // EFECTO 1: Carga inicial de niveles de seguridad desde el backend
@@ -207,18 +215,49 @@ export default function Dashboard() {
   // Función para alternar la visibilidad de los caminos de la zona activa
   const manejarVisibilidadCaminos = (nombreZona) => {
     const isVisible = caminosVisibles[nombreZona];
-    const caminosUrl = zonasDisponibles[nombreZona].caminosUrl;
+    const nombreRuta = zonasDisponibles[nombreZona].caminosNombre;
 
     if (isVisible) {
+      // Caso 1: OCULTAR CAMINOS (y volver a mostrar la zona)
       setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: false }));
       setCaminosData(null);
+
+      // RESTAURAR LA ZONA: Vuelve a cargar la geometría de la zona para que MapZoomer la enfoque.
+      // Puedes reutilizar la lógica de carga de zona o, más simple, cargar la data que ya tienes.
+      // Para este ejemplo, llamaremos a la función de selección de zona para restaurar la vista.
+      manejarSeleccionZona(nombreZona); // Llama al manejador de zona para recargar/enfocar la zona
     } else {
-      // NOTA: Los caminos (caminosUrl) siguen apuntando a archivos estáticos locales.
-      fetch(caminosUrl)
-        .then((response) => response.json())
+      // Caso 2: MOSTRAR CAMINOS (y ocultar la zona)
+
+      // 🚨 Paso 1: OCULTAR ZONA MARCADA
+      setZonaData(null); // Esto hace que el GeoJSON de la zona deje de renderizarse
+      setEstiloZonaSeleccionada(null); // Opcional, pero buena práctica
+
+      const apiUrl = `${FLASK_API_BASE_URL}/ruta/${nombreRuta}`;
+
+      fetch(apiUrl)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              "Error al cargar la ruta desde Flask: " + response.statusText
+            );
+          }
+          return response.json();
+        })
         .then((data) => {
-          setCaminosData(data);
-          setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: true }));
+          if (data && data.caminos_geojson) {
+            // 🚨 Paso 2: CARGAR CAMINOS Y USAR SU GEOMETRÍA PARA EL ZOOM
+            setCaminosData(data.caminos_geojson);
+
+            // MapZoomer reaccionará a 'caminosData' para hacer zoom.
+            // Para esto, necesitamos que MapZoomer pueda escuchar tanto 'zonaData' como 'caminosData'.
+
+            setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: true }));
+          } else {
+            console.error(
+              "Error: El backend no devolvió la geometría (caminos_geojson) para la ruta."
+            );
+          }
         })
         .catch((err) =>
           console.error("Error cargando GeoJSON de caminos:", err)
@@ -226,7 +265,7 @@ export default function Dashboard() {
     }
   };
 
-  // Estilo de caminos 
+  // Estilo de caminos
   const estiloCaminos = {
     color: "orange",
     weight: 3,
@@ -283,18 +322,16 @@ export default function Dashboard() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
         />
-
-        <MapZoomer zonaData={zonaData} />
-
+        {/* ¡Aquí el cambio! Pasar caminosData */}
+        <MapZoomer zonaData={zonaData} caminosData={caminosData} />
         {/* Caminos peatonales */}
         {caminosData && <GeoJSON data={caminosData} style={estiloCaminos} />}
-
-      {/* Zona seleccionada: USA EL ESTILO DINÁMICO */}
+        {/* Zona seleccionada: Ahora solo se renderiza si zonaData tiene algo */}
         {zonaData && estiloZonaSeleccionada && (
           <GeoJSON data={zonaData} style={estiloZonaSeleccionada} />
-        )} 
+        )}
         {/* Paradas */}
-       {paradas.map(parada => (
+        {paradas.map((parada) => (
           <Marker
             key={parada.parada_id}
             position={[parada.latitud, parada.longitud]}
@@ -303,10 +340,14 @@ export default function Dashboard() {
             <Popup>
               <strong>{parada.nombre_calle}</strong>
               <br />
-              Líneas: {parada.lineas?.length ? parada.lineas.join(", ") : "No registradas"}
+              Líneas:{" "}
+              {parada.lineas?.length
+                ? parada.lineas.join(", ")
+                : "No registradas"}
             </Popup>
           </Marker>
-        ))} {/* Cierre corregido: )) } */}
+        ))}{" "}
+        {/* Cierre corregido: )) } */}
       </MapContainer>
     </div>
   );

@@ -121,6 +121,59 @@ def get_zona_data(nombre_zona):
     # Retorna todos los datos, incluido el GeoJSON ya como objeto
     return jsonify(zona_data)
 
+# ===============================================
+# RUTA 3: OBTENER DATA COMPLETA DE RUTA (CAMINOS)
+# ===============================================
+@app.route('/ruta/<nombre_ruta>', methods=['GET'])
+def get_ruta_data(nombre_ruta):
+    """
+    Retorna toda la información de una ruta (camino), incluyendo el GeoJSON.
+    """
+    connection = get_db_connection()
+    if not connection:
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+
+    cursor = connection.cursor(dictionary=True)
+    
+    try:
+        # Recuperamos la información de la ruta
+        sql = """
+        SELECT ruta_id, nombre_ruta, nivel_id, caminos_poligonos_geograficos 
+        FROM RutasDeSeguridad 
+        WHERE nombre_ruta = %s
+        """
+        
+        cursor.execute(sql, (nombre_ruta,))
+        ruta_data = cursor.fetchone()
+        
+        if not ruta_data:
+            return jsonify({"error": "Ruta no encontrada"}), 404
+
+        # El campo caminos_poligonos_geograficos es un string. Lo convertimos a JSON.
+        if ruta_data['caminos_poligonos_geograficos']:
+            # Usamos una clave descriptiva para el GeoJSON de caminos
+            ruta_data['caminos_geojson'] = json.loads(ruta_data['caminos_poligonos_geograficos'])
+        else:
+            ruta_data['caminos_geojson'] = None
+        
+        # Eliminamos el string largo original de la respuesta
+        del ruta_data['caminos_poligonos_geograficos']
+            
+    except mysql.connector.Error as err:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": f"Error al consultar la ruta. Detalle: {err}"}), 500
+    except json.JSONDecodeError:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": "Error al decodificar el GeoJSON de caminos de la base de datos"}), 500
+    
+    cursor.close()
+    connection.close()
+
+    # Retorna todos los datos de la ruta, incluido el GeoJSON ya como objeto
+    return jsonify(ruta_data)
+
 # -----------------------------------------------
 # Endpoint de paradas con líneas (¡CORREGIDO!)
 # -----------------------------------------------
