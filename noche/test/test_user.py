@@ -12,8 +12,8 @@ def test_create_user_success(client):
 
 # RUTA PULL
 def test_update_user_partial_success(client):
-
-    user_id = 
+ 
+    user_id = ""
     nuevo_nombre = "NombreActualizadoPorPUT"
 
     update_data = {"nombre_usuario": nuevo_nombre}

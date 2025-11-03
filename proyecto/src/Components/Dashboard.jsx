@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./Dashboard.css";
 
-// URL base de tu backend Flask
+// URL base de tu backend Flask (Ajusta el puerto si usas PHP)
 const FLASK_API_BASE_URL = "http://localhost:5000";
 
 // Icono para las paradas
@@ -14,26 +14,6 @@ const iconoParada = L.icon({
   iconAnchor: [15, 30],
   popupAnchor: [0, -25],
 });
-
-export default function Dashboard() {
-  const [paradas, setParadas] = useState([]);
-  const [zonasDisponibles, setZonasDisponibles] = useState({});
-  const [zonasNivelesDB, setZonasNivelesDB] = useState(null);
-  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
-  const [zonaData, setZonaData] = useState(null);
-  const [caminosData, setCaminosData] = useState(null);
-  const [caminosVisibles, setCaminosVisibles] = useState({});
-}
-
-  // -----------------------------
-  // 1️⃣ Cargar paradas
-  // -----------------------------
-  useEffect(() => {
-    fetch(`${FLASK_API_BASE_URL}/paradas`)
-      .then(res => res.json())
-      .then(data => setParadas(data))
-      .catch(err => console.error("Error cargando paradas:", err));
-  }, []);
 
 // ----------------------------------------------------
 // Mapeo de Niveles de Seguridad a Estilos (Colores)
@@ -102,19 +82,29 @@ function MapZoomer({ zonaData }) {
 }
 // ----------------------------------------------------
 
+
 export default function Dashboard() {
-  const [caminosData, setCaminosData] = useState(null);
-  const [zonaData, setZonaData] = useState(null);
-  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
-  const [caminosVisibles, setCaminosVisibles] = useState({});
-
-  // ESTADO para las zonas, que ahora incluirán los estilos y niveles dinámicos
+  // ESTADOS MOVIDOS DENTRO DE LA FUNCIÓN
+  const [paradas, setParadas] = useState([]);
   const [zonasDisponibles, setZonasDisponibles] = useState({});
-  // ESTADO para guardar los niveles de seguridad recibidos de Flask
   const [zonasNivelesDB, setZonasNivelesDB] = useState(null);
-
-  // Estado para guardar el estilo FINAL de la zona seleccionada
+  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
+  const [zonaData, setZonaData] = useState(null);
+  const [caminosData, setCaminosData] = useState(null);
+  const [caminosVisibles, setCaminosVisibles] = useState({});
   const [estiloZonaSeleccionada, setEstiloZonaSeleccionada] = useState(null);
+
+
+  // -----------------------------
+  // 1️⃣ Cargar paradas (MOVIDO Y CORREGIDO)
+  // -----------------------------
+  useEffect(() => {
+    fetch(`${FLASK_API_BASE_URL}/paradas`)
+      .then(res => res.json())
+      .then(data => setParadas(data))
+      .catch(err => console.error("Error cargando paradas:", err));
+  }, []);
+
 
   // -----------------------------------------------------------------
   // EFECTO 1: Carga inicial de niveles de seguridad desde el backend
@@ -299,12 +289,12 @@ export default function Dashboard() {
         {/* Caminos peatonales */}
         {caminosData && <GeoJSON data={caminosData} style={estiloCaminos} />}
 
-        {/* Zona seleccionada: USA EL ESTILO DINÁMICO */}
+      {/* Zona seleccionada: USA EL ESTILO DINÁMICO */}
         {zonaData && estiloZonaSeleccionada && (
           <GeoJSON data={zonaData} style={estiloZonaSeleccionada} />
-        )
+        )} 
         {/* Paradas */}
-        {paradas.map(parada => (
+       {paradas.map(parada => (
           <Marker
             key={parada.parada_id}
             position={[parada.latitud, parada.longitud]}
@@ -316,7 +306,7 @@ export default function Dashboard() {
               Líneas: {parada.lineas?.length ? parada.lineas.join(", ") : "No registradas"}
             </Popup>
           </Marker>
-        }
+        ))} {/* Cierre corregido: )) } */}
       </MapContainer>
     </div>
   );

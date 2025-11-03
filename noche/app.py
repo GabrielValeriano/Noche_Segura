@@ -121,26 +121,40 @@ def get_zona_data(nombre_zona):
     # Retorna todos los datos, incluido el GeoJSON ya como objeto
     return jsonify(zona_data)
 
-# -----------------------
-# Endpoint de paradas con líneas
-# -----------------------
+# -----------------------------------------------
+# Endpoint de paradas con líneas (¡CORREGIDO!)
+# -----------------------------------------------
 @app.route('/paradas', methods=['GET'])
 def get_paradas_con_lineas():
     connection = get_db_connection()
     if not connection:
         return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
     cursor = connection.cursor(dictionary=True)
+    
+    # --- INICIO DE CORRECCIÓN ---
+    # 1. La consulta ahora une las 3 tablas correctas:
+    #    ParadasDeColectivo -> Parada_Linea -> LineasDeColectivo
+    # 2. Seleccionamos 'l.numero_linea' para obtener el nombre (ej: "55")
     query = """
-        SELECT p.parada_id, p.latitud, p.longitud, p.nombre_calle, p.nivel_id, l.linea
-        FROM ParadasDeColectivo p
-        LEFT JOIN LineasPorParada l ON p.parada_id = l.parada_id
-        ORDER BY p.parada_id
+        SELECT 
+            p.parada_id, p.latitud, p.longitud, p.nombre_calle, p.nivel_id, 
+            l.numero_linea 
+        FROM 
+            ParadasDeColectivo p
+        LEFT JOIN 
+            Parada_Linea pl ON p.parada_id = pl.parada_id
+        LEFT JOIN 
+            LineasDeColectivo l ON pl.linea_id = l.linea_id
+        ORDER BY 
+            p.parada_id
     """
+    # --- FIN DE CORRECCIÓN ---
+    
     cursor.execute(query)
     rows = cursor.fetchall()
     connection.close()
 
-    # Agrupar líneas por parada
+    # Agrupar líneas por parada (Lógica de agrupación en Python)
     paradas = {}
     for row in rows:
         pid = row['parada_id']
@@ -153,8 +167,12 @@ def get_paradas_con_lineas():
                 "nivel_id": row['nivel_id'],
                 "lineas": []
             }
-        if row['linea']:
-            paradas[pid]["lineas"].append(row['linea'])
+        
+        # --- INICIO DE CORRECCIÓN ---
+        # 3. Usamos la columna 'numero_linea' (en lugar de 'linea')
+        if row['numero_linea']:
+            paradas[pid]["lineas"].append(row['numero_linea'])
+        # --- FIN DE CORRECCIÓN ---
 
     return jsonify(list(paradas.values()))
 
@@ -314,4 +332,4 @@ def login_usuario():
 
 if __name__ == '__main__':
     # Usamos host='0.0.0.0' para que sea accesible desde el frontend de React
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000) # Aseguramos el puerto 5000
