@@ -51,7 +51,7 @@ const estilosPorNivel = {
 
 // Definición inicial estática de zonas (Solo mantenemos URLs de Caminos)
 const ZONAS_ESTATICAS = {
-  "Comuna 8": {
+  "Villa Soldati": {
     caminosNombre: "Parque de la Ciudad",
   },
   Caballito: {
@@ -65,29 +65,33 @@ const ZONAS_ESTATICAS = {
 // ----------------------------------------------------
 // Componente para ajustar la vista del mapa (Zoom)
 // ----------------------------------------------------
-function MapZoomer({ zonaData, caminosData }) {
+function MapZoomer({ zonaData, caminosData, zonaSeleccionada }) {
   const map = useMap();
 
   useEffect(() => {
-    // 1. Prioriza el zoom en los caminos si están activos
-    if (caminosData) {
-      const geoJsonLayer = L.geoJson(caminosData);
+    // 🚨 1. SOLUCIÓN ESPECÍFICA PARA CAMINOS DE RESERVA ECOLÓGICA (Puerto Madero)
+    if (zonaSeleccionada === "Puerto Madero" && caminosData) {
+      console.log(
+        "Detectados caminos de 'Reserva Ecologica'. Aplicando zoom fijo."
+      );
+      // Coordenadas aproximadas del centro de la Reserva Ecológica (Zoom 15 para más detalle)
+      map.flyTo([-34.607044, -58.35225], 14.7);
+      return;
+    }
+
+    // 3. Comportamiento normal (para Caballito, o si los GeoJSON de zona/caminos son correctos)
+    const dataToUse = caminosData || zonaData;
+
+    if (dataToUse) {
+      const geoJsonLayer = L.geoJson(dataToUse);
       const bounds = geoJsonLayer.getBounds();
 
       if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [50, 50] });
+        // Para las zonas buenas, ajusta el zoom al límite del GeoJSON
+        map.fitBounds(bounds, { padding: [40, 40] });
       }
     }
-    // 2. Si no hay caminos, haz zoom en la zona (comportamiento original)
-    else if (zonaData) {
-      const geoJsonLayer = L.geoJson(zonaData);
-      const bounds = geoJsonLayer.getBounds();
-
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [50, 50] });
-      }
-    }
-  }, [zonaData, caminosData, map]); // Asegúrate de incluir caminosData en las dependencias
+  }, [zonaData, caminosData, zonaSeleccionada, map]);
 
   return null;
 }
@@ -269,7 +273,6 @@ export default function Dashboard() {
   const estiloCaminos = {
     color: "orange",
     weight: 3,
-    dashArray: "4.5, 4.5", // punteado
   };
 
   const zonasArray = Object.keys(zonasDisponibles);
@@ -322,8 +325,11 @@ export default function Dashboard() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
         />
-        {/* ¡Aquí el cambio! Pasar caminosData */}
-        <MapZoomer zonaData={zonaData} caminosData={caminosData} />
+        <MapZoomer
+          zonaData={zonaData}
+          caminosData={caminosData}
+          zonaSeleccionada={zonaSeleccionada}
+        />
         {/* Caminos peatonales */}
         {caminosData && <GeoJSON data={caminosData} style={estiloCaminos} />}
         {/* Zona seleccionada: Ahora solo se renderiza si zonaData tiene algo */}
