@@ -60,6 +60,12 @@ const ZONAS_ESTATICAS = {
   "Puerto Madero": {
     caminosNombre: "Reserva Ecologica",
   },
+    "Palermo": {
+      caminosNombre: "Paseo El Rosedal"
+  },
+  "Parque Patricios": {
+    caminosNombre: "Parque Florentino"
+  },
 };
 
 // ----------------------------------------------------

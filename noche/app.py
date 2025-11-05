@@ -43,7 +43,7 @@ def get_niveles_seguridad_zonas():
     cursor = connection.cursor(dictionary=True)
     
     # Zonas que el frontend espera (React)
-    zonas_de_interes = ["Villa Soldati", "Caballito", "Puerto Madero"]
+    zonas_de_interes = ["Villa Soldati", "Caballito", "Puerto Madero", "Palermo", "Parque Patricios"]
     
     try:
         # Construimos la cláusula IN dinámicamente: (%s, %s, %s)
