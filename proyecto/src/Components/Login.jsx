@@ -73,6 +73,12 @@ const Login = () => {
           />
         </div>
 
+        {/* --- NUEVO ENLACE DE RECUPERAR CONTRASEÑA --- */}
+        <div className="forgot-password-link">
+          {/* Este enlace debe apuntar a la ruta de tu componente de recuperación */}
+          <a href="/RecuperarContrasena">¿Olvidaste tu contraseña?</a>
+        </div>
+
         {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
         <div>
           <h4>¿No tiene cuenta?</h4>

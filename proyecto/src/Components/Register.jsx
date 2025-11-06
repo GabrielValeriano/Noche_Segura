@@ -3,9 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "./Register.css"; // importamos los estilos
 
 const Register = () => {
+  // Estados para todos los campos del formulario
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [confirmarContrasena, setConfirmarContrasena] = useState(""); // <-- NUEVO
+  const [preguntaSeguridad, setPreguntaSeguridad] = useState(""); // <-- NUEVO
+  const [respuestaSeguridad, setRespuestaSeguridad] = useState(""); // <-- NUEVO
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -16,10 +21,30 @@ const Register = () => {
     setError("");
     setSuccess("");
 
-    if (!nombreUsuario || !email || !contrasena) {
+    // --- VALIDACIÓN DEL FRONTEND ---
+    if (
+      !nombreUsuario ||
+      !email ||
+      !contrasena ||
+      !confirmarContrasena ||
+      !preguntaSeguridad ||
+      !respuestaSeguridad
+    ) {
       setError("Todos los campos son obligatorios");
       return;
     }
+
+    if (contrasena !== confirmarContrasena) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+
+    if (contrasena.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres.");
+        return;
+    }
+    // --- FIN VALIDACIÓN ---
+
 
     try {
       const response = await fetch("http://localhost:5000/usuarios", {
@@ -27,10 +52,13 @@ const Register = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        // --- BODY ACTUALIZADO (ENVIANDO LOS 5 CAMPOS) ---
         body: JSON.stringify({
           nombre_usuario: nombreUsuario,
           email: email,
           contrasena: contrasena,
+          pregunta_seguridad: preguntaSeguridad, // <-- NUEVO
+          respuesta_seguridad: respuestaSeguridad   // <-- NUEVO
         }),
       });
 
@@ -41,12 +69,13 @@ const Register = () => {
         return;
       }
 
-      setSuccess("Registro exitoso! Ahora podés iniciar sesión.");
+      setSuccess("¡Registro exitoso! Redirigiendo al login...");
 
       // Redirigir al login después de 2 segundos
       setTimeout(() => {
         navigate("/");
       }, 2000);
+
     } catch (err) {
       setError("Error de conexión con el servidor");
     }
@@ -78,8 +107,48 @@ const Register = () => {
           <input
             type="password"
             value={contrasena}
-            placeholder="Contraseña"
+            placeholder="Contraseña (mín. 6 caracteres)"
             onChange={(e) => setContrasena(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* --- CAMPO NUEVO --- */}
+        <div>
+          <input
+            type="password"
+            value={confirmarContrasena}
+            placeholder="Confirmar contraseña"
+            onChange={(e) => setConfirmarContrasena(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* --- CAMPO NUEVO (PREGUNTA) --- */}
+        <div>
+          {/* El 'value=""' y 'disabled' hacen que "Elige..." no sea una opción seleccionable */}
+          <select 
+            value={preguntaSeguridad}
+            onChange={(e) => setPreguntaSeguridad(e.target.value)}
+            required
+            // 'invalid' se aplica si el valor es "" (el default)
+            // esto ayuda a que el placeholder 'Elige...' se vea grisado
+            style={preguntaSeguridad === "" ? { color: '#757575' } : { color: '#333' }}
+          >
+            <option value="" disabled>Elige una pregunta de seguridad...</option>
+            <option value="Nombre de tu primera mascota">¿Nombre de tu primera mascota?</option>
+            <option value="Ciudad donde naciste">¿Ciudad donde naciste?</option>
+            <option value="Nombre de tu escuela primaria">¿Nombre de tu escuela primaria?</option>
+          </select>
+        </div>
+
+        {/* --- CAMPO NUEVO (RESPUESTA) --- */}
+        <div>
+          <input
+            type="text"
+            value={respuestaSeguridad}
+            placeholder="Tu respuesta secreta"
+            onChange={(e) => setRespuestaSeguridad(e.target.value)}
             required
           />
         </div>
@@ -93,7 +162,7 @@ const Register = () => {
       </form>
 
       {/* Texto para redirigir al login */}
-      <h4 className="color2">¿Ya tenés cuenta?</h4>
+      <h4 style={{marginTop: '20px', color: '#555'}}>¿Ya tenés cuenta?</h4>
       <a href="/">Iniciar sesión</a>
     </div>
   );

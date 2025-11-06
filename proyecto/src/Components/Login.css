@@ -132,3 +132,23 @@ button:hover {
 .color{
   color: #555;
 }
+
+/* --- ESTILO AÑADIDO: Enlace de "Olvidé mi Contraseña" --- */
+.forgot-password-link {
+   width: 100%; /* Ocupa todo el ancho */
+   text-align: right; /* Alinea el enlace a la derecha */
+   margin-bottom: 15px; /* Espacio antes del botón o del texto de registro */
+}
+
+/* Reutilizar el estilo base de los enlaces para el enlace de olvido */
+.forgot-password-link a {
+   font-size: 14px;
+   color: #007bff;
+   text-decoration: none;
+   transition: color 0.3s;
+}
+
+.forgot-password-link a:hover {
+   text-decoration: underline;
+   color: #0056b3;
+}
