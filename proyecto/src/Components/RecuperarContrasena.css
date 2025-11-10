@@ -1,0 +1,138 @@
+/* Reutilizamos los estilos del Login, adaptados para Register */
+
+/* --- Estilo del contenedor principal --- */
+.recuperar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 380px;
+  max-width: 90%;
+  box-sizing: border-box;
+}
+
+/* --- Estilo del título --- */
+.recuperar-container h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* --- Estilo de los inputs, select y su espaciado --- */
+.recuperar-container > form > div {
+  margin-bottom: 20px; /* Espaciado entre cada input */
+  width: 100%;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+  /* Para que el select no se vea distinto */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #ffffff;
+}
+
+/* Color del placeholder del select cuando no se ha elegido nada */
+select:invalid {
+  color: #757575;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.recuperar-container .enlace-centrado {
+  /* Alinea el texto y los elementos inline (como el 'a' y el 'h4') 
+       al centro dentro del div contenedor.
+    */
+  text-align: center;
+  margin-top: 20px; /* Añade un poco de espacio por encima si lo necesitas */
+}
+login-container h4,
+.recuperar-container h4 {
+  font-weight: 400;
+  font-size: 14px;
+  color: #555;
+  margin: 0; /* Esto elimina el margen por defecto del h4 (arriba y abajo) */
+}
+/* Si el h4 está fuera del .login-container pero dentro de un div, también aplicamos: */
+.enlace-centrado h4 {
+  margin-bottom: 0px; /* Aseguramos que no haya margen inferior si el 'display: inline' no es suficiente */
+}
+/* --- Estilo del texto y el enlace de "Iniciar Sesión" --- */
+.register-container h4 {
+  font-weight: 400;
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  display: inline;
+}
+
+.register-container a {
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.register-container a:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+/* --- Estilo del botón --- */
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  background-color: #eec200;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #fc9b1c;
+}
+
+/* --- Estilos para mensajes de error y éxito --- */
+.error-message {
+  color: rgb(151, 13, 13);
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  color: rgb(13, 151, 28); /* Un color verde para éxito */
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Contenedor específico para la pregunta en la recuperación */
+.pregunta-container {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #007bff;
+}

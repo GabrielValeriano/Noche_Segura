@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 // Reutilizamos los mismos estilos del Register para no duplicar CSS
-import "./Register.css"; 
+import "./RecuperarContrasena.css";
 
 const RecuperarContrasena = () => {
   // --- Estados ---
   const [paso, setPaso] = useState(1); // 1: Buscar user, 2: Responder pregunta
-  
+
   // Paso 1
   const [identificador, setIdentificador] = useState("");
-  
+
   // Paso 2
   const [pregunta, setPregunta] = useState("");
   const [respuesta, setRespuesta] = useState("");
@@ -41,7 +41,6 @@ const RecuperarContrasena = () => {
       // Éxito: guardamos la pregunta y avanzamos al paso 2
       setPregunta(data.pregunta);
       setPaso(2);
-
     } catch (err) {
       setError("Error de conexión con el servidor.");
     }
@@ -59,50 +58,53 @@ const RecuperarContrasena = () => {
       return;
     }
     if (nuevaContrasena.length < 6) {
-        setError("La nueva contraseña debe tener al menos 6 caracteres.");
-        return;
+      setError("La nueva contraseña debe tener al menos 6 caracteres.");
+      return;
     }
 
     // 2. Enviar todo al backend
     try {
-        const response = await fetch("http://localhost:5000/restablecer-por-pregunta", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                identificador: identificador,
-                respuesta_seguridad: respuesta,
-                nueva_contrasena: nuevaContrasena
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            setError(data.error || "No se pudo restablecer la contraseña.");
-            return;
+      const response = await fetch(
+        "http://localhost:5000/restablecer-por-pregunta",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            identificador: identificador,
+            respuesta_seguridad: respuesta,
+            nueva_contrasena: nuevaContrasena,
+          }),
         }
+      );
 
-        // Éxito final
-        setMensajeExito("¡Contraseña actualizada! Redirigiendo al Login...");
-        setTimeout(() => {
-            window.location.href = "/"; // Volvemos al Login
-        }, 3000);
+      const data = await response.json();
 
+      if (!response.ok) {
+        setError(data.error || "No se pudo restablecer la contraseña.");
+        return;
+      }
+
+      // Éxito final
+      setMensajeExito("¡Contraseña actualizada! Redirigiendo al Login...");
+      setTimeout(() => {
+        window.location.href = "/"; // Volvemos al Login
+      }, 3000);
     } catch (err) {
-        setError("Error de conexión con el servidor.");
+      setError("Error de conexión con el servidor.");
     }
   };
 
   return (
     // Usamos 'register-container' para reciclar el CSS
-    <div className="register-container">
+    <div className="recuperar-container">
       <h2>Recuperar Contraseña</h2>
 
       {/* --- FORMULARIO DEL PASO 1 --- */}
       {paso === 1 && (
         <form onSubmit={handleBuscarPregunta}>
-          <p style={{color: '#555', fontSize: '14px', textAlign: 'center'}}>
-            Ingresa tu email o nombre de usuario para buscar tu pregunta de seguridad.
+          <p style={{ color: "#555", fontSize: "14px", textAlign: "center" }}>
+            Ingresa tu email o nombre de usuario para buscar tu pregunta de
+            seguridad.
           </p>
           <div>
             <input
@@ -113,11 +115,16 @@ const RecuperarContrasena = () => {
               required
             />
           </div>
-          
+
           {error && <p className="error-message">{error}</p>}
 
           <div className="button-group">
             <button type="submit">Buscar</button>
+          </div>
+          {/* Enlace para volver */}
+          <div className="enlace-centrado">
+            <h4>¿Recordaste tu contraseña?</h4>
+            <a href="/">Inicia Sesión</a>
           </div>
         </form>
       )}
@@ -126,10 +133,14 @@ const RecuperarContrasena = () => {
       {paso === 2 && (
         <form onSubmit={handleRestablecer}>
           <div className="pregunta-container">
-            <label style={{color: '#555', fontSize: '14px'}}>Tu pregunta de seguridad:</label>
-            <p style={{fontWeight: 600, color: '#333', marginTop: '5px'}}>"{pregunta}"</p>
+            <label style={{ color: "#555", fontSize: "14px" }}>
+              Tu pregunta de seguridad:
+            </label>
+            <p style={{ fontWeight: 600, color: "#333", marginTop: "5px" }}>
+              "{pregunta}"
+            </p>
           </div>
-          
+
           <div>
             <input
               type="text"
@@ -158,20 +169,18 @@ const RecuperarContrasena = () => {
             />
           </div>
 
-          {error && <p className="error-message">{error}</p>}
-          {mensajeExito && <p className="success-message">{mensajeExito}</p>}
-
           <div className="button-group">
             <button type="submit">Restablecer Contraseña</button>
           </div>
+          {error && <p className="error-message">{error}</p>}
+          {mensajeExito && <p className="success-message">{mensajeExito}</p>}
+          {/* Enlace para volver */}
+          <div className="enlace-centrado">
+            <h4>¿Recordaste tu contraseña?</h4>
+            <a href="/">Inicia Sesión</a>
+          </div>
         </form>
       )}
-
-      {/* Enlace para volver */}
-      <div>
-        <h4>¿Recordaste tu contraseña?</h4>
-        <a href="/">Inicia Sesión</a>
-      </div>
     </div>
   );
 };

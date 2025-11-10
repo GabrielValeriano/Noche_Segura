@@ -2,47 +2,64 @@
 /* 1. Layout Base */
 /* ---------------------------------------------------- */
 .dashboard {
-    height: 100vh;
-    width: 100vw;
-    position: relative;
-    overflow: hidden; /* Evita barras de desplazamiento innecesarias */
+  height: 100vh;
+  width: 100vw;
+  position: relative;
 }
 
-/* El mapa cubre todo el contenedor */
+/* El mapa aún ocupa el 75% del ancho a la izquierda */
 .map {
-    height: 100%;
-    width: 100%; /* Hacemos que ocupe todo el ancho para que la sidebar flote encima */
+  height: 86.5%;
+  width: 73%;
+  margin-left: auto;
+  top: 90px;
 }
 
+.bannerbuscardor {
+  position: absolute;
+  top: 0;
+  height: 90px;
+
+  /* 1. Definir el mismo ancho que el mapa (67%) */
+  width: 100%;
+  background-color: #ffffff;
+  /* 2. Centrarlo horizontalmente */
+
+  /* Z-index intermedio: sobre el mapa, bajo el sidebar */
+  z-index: 1000;
+  /* La propiedad pointer-events: none; es útil si quieres que los clics
+     pasen a través del overlay y lleguen al mapa de abajo */
+  pointer-events: none;
+  border-bottom: solid 5px rgb(255, 208, 0);
+}
 /* ---------------------------------------------------- */
 /* 2. Banner Lateral Flotante (Sidebar) */
 /* ---------------------------------------------------- */
 .sidebar {
-    position: absolute;
-    /* 🚨 AJUSTE CLAVE: Coloca la barra a la izquierda y dale un pequeño margen */
-    left: 20px;
-    top: 20px;
+  /* Posicionamiento Absoluto: Flota sobre el mapa */
+  position: absolute;
+  top: 90px;
+  /* 🚨 CAMBIO CLAVE: Mueve el banner a la derecha */
 
-    width: 350px;
-    /* Dejamos la altura automática para que se ajuste al contenido (o puedes usar un max-height) */
-    /* height: 590px; */
-    
-    padding: 15px; /* Más padding para que respire */
-    background-color: rgba(255, 255, 255, 0.95); /* Fondo semitransparente suave */
-    border-radius: 8px; /* Bordes redondeados */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra elegante */
-    
-    z-index: 1000;
-    
-    font-family: 'Inter', Arial, sans-serif;
-    text-align: left;
+  /* (Se eliminó 'left: 20px;') */
+
+  width: 351.5px;
+  height: 513px;
+  padding: 30px;
+
+  background-color: white;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra elegante */
+
+  font-family: "Inter", Arial, sans-serif;
+  text-align: left;
 }
 
 .sidebar h3 {
-    color: #333;
-    margin-top: 0;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #eee;
+  color: #333;
+  margin-top: 0;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #eee;
 }
 
 /* ---------------------------------------------------- */
@@ -51,99 +68,98 @@
 
 /* Contenedor de zonas si tienes botones uno debajo del otro */
 .zonas-disponibles {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .zona-btn {
-    display: block;
-    width: 95%; /* Ocupa casi todo el ancho de la sidebar */
-    padding: 10px 15px;
-    margin-bottom: 4px;
-    text-align: left;
-    border: none;
-    border-radius: 4px; /* Un poco de borde redondeado */
-    background-color: #f7f7f7;
-    cursor: pointer;
-    font-size: 14px;
-    color: #333;
-    transition: background-color 0.15s ease;
+  display: block;
+  width: 95%; /* Ocupa casi todo el ancho de la sidebar */
+  padding: 10px 15px;
+  margin-bottom: 4px;
+  text-align: left;
+  border: none;
+  border-radius: 4px; /* Un poco de borde redondeado */
+  background-color: #f7f7f7;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.15s ease;
 }
 
 .zona-btn:hover {
-    background-color: #ececec;
+  background-color: #ececec;
 }
 
 .zona-btn.active {
-    background-color: #5b5b5b; /* Gris oscuro para selección */
-    color: white;
-    font-weight: bold;
+  background-color: #5b5b5b; /* Gris oscuro para selección */
+  color: white;
+  font-weight: bold;
 }
 
 /* Estilo para el botón de Caminos (anidado) */
 .caminos-btn {
-    display: block;
-    width: 90%;
-    margin: 5px 0 15px 10px; /* Margen para anidarlo debajo de la zona */
-    padding: 5px 10px;
-    border: 1px solid #007bff;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.15s ease;
+  display: block;
+  width: 90%;
+  margin: 5px 0 15px 10px; /* Margen para anidarlo debajo de la zona */
+  padding: 5px 10px;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.15s ease;
 }
 
 .caminos-btn:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
-
 
 /* ---------------------------------------------------- */
 /* 4. Estilos de Líneas de Colectivo (Chips) */
 /* ---------------------------------------------------- */
 
 .lineas-filtro {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
 }
 
 .lineas-filtro h3 {
-    font-size: 1.1em;
-    margin-bottom: 10px;
-    color: #333;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  color: #333;
 }
 
 .lineas-contenedor {
-    display: flex;
-    flex-wrap: wrap; 
-    gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* Estilo Base del Chip (Botón) */
 .linea-chip {
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-radius: 20px; /* Estilo chip */
-    background-color: #f0f0f0;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: bold;
-    color: #555;
-    transition: all 0.2s ease;
-    white-space: nowrap; 
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Estilo chip */
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #555;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 /* Estilo cuando el chip está activo (línea visible) */
 .linea-chip.activa {
-    background-color: #6f42c1; /* Púrpura */
-    color: white;
-    border-color: #6f42c1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #6f42c1; /* Púrpura */
+  color: white;
+  border-color: #6f42c1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Efecto hover */
 .linea-chip:hover {
-    opacity: 0.8;
+  opacity: 0.8;
 }

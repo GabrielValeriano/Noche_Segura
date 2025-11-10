@@ -1,154 +1,171 @@
 /* --- Estilos del body para el fondo y la tipografía --- */
-body{
- display: flex;
- flex-direction: column;
- align-items: center;
- justify-content: center;
- min-height: 100vh;
- margin: 0;
- font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente formal */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Fuente formal */
 
- background-image: url('https://enelsubte.com/wp-content/uploads/2014/12/metrobus-9-de-julio-carteleria.jpg');
- background-size: cover;
- background-position: center;
- background-repeat: no-repeat;
- background-attachment: fixed; 
+  background-image: url("https://enelsubte.com/wp-content/uploads/2014/12/metrobus-9-de-julio-carteleria.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
-
 
 /* --- Estilo del contenedor principal del login --- */
 .login-container {
- display: flex;
- flex-direction: column;
- align-items: center;
- padding: 40px;
- border-radius: 12px;
- background-color: rgba(255, 255, 255, 0.95);
- box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
- width: 380px;
- max-width: 90%;
- box-sizing: border-box; /* Asegura que el padding no aumente el ancho */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 380px;
+  max-width: 90%;
+  box-sizing: border-box; /* Asegura que el padding no aumente el ancho */
 }
-
 
 /* --- Estilo del título --- */
 h2 {
- font-size: 28px;
- color: #333;
- margin-bottom: 30px;
- font-weight: 600;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: 600;
 }
 
+/* La clase input-wrapper se mantiene igual */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  position: absolute;
+  /* --- CAMBIOS AQUÍ --- */
+  right: 15px;     	/* Cambiamos 'left' por 'right' */
+  left: auto;      	/* Aseguramos que 'left' no tenga valor */
+  /* --- FIN CAMBIOS --- */
+  top: 50%;      	 
+  transform: translateY(-50%);
+  color: #888;  	 
+  font-size: 16px;
+}
+
+
+/* --- (MODIFICADO) Ajuste a los Inputs --- */
 
 /* --- Estilo de los inputs y su espaciado --- */
 .login-container > div > div {
- margin-bottom: 20px; /* Espaciado entre cada input */
- width: 100%;
+  margin-bottom: 20px; /* Espaciado entre cada input */
+  width: 100%;
 }
-
 
 input[type="email"], input[type="password"] {
- width: 100%;
- padding: 12px;
- font-size: 16px;
- border: 1px solid #ccc;
- border-radius: 8px;
- transition: border-color 0.3s, box-shadow 0.3s;
- box-sizing: border-box;
+  width: 100%;
+  /* --- CAMBIOS AQUÍ --- */
+  padding: 12px 45px 12px 12px; /* <-- Acolchado DERECHO aumentado a 45px, el IZQUIERDO vuelve a 12px */
+  /* --- FIN CAMBIOS --- */
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
-
 
 input:focus {
- outline: none;
- border-color: #007bff; /* Un color azul profesional al enfocar */
- box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+  border-color: #007bff; /* Un color azul profesional al enfocar */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
-
 
 /* --- Estilo del texto y el enlace de "Registrarse" --- */
 .login-container h4 {
- font-weight: 400;
- font-size: 14px;
- color: #555;
- margin: 0;
- display: inline;
+  font-weight: 400;
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  display: inline;
 }
-
 
 .login-container a {
- font-size: 14px;
- color: #007bff;
- text-decoration: none;
- transition: color 0.3s;
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
 }
-
 
 .login-container a:hover {
- text-decoration: underline;
- color: #0056b3;
+  text-decoration: underline;
+  color: #0056b3;
 }
-
 
 /* --- Estilo del botón --- */
 button {
- width: 100%;
- padding: 12px;
- font-size: 18px;
- font-weight: 600;
- color: white;
- background-color: #eec200; /* Un gris oscuro formal */
- border: none;
- border-radius: 8px;
- cursor: pointer;
- transition: background-color 0.3s;
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  background-color: #eec200; /* Un gris oscuro formal */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
-
 
 button:hover {
- background-color: #fc9b1c;
+  background-color: #fc9b1c;
 }
-
 
 /* El segundo contenedor no tiene contenido en tu JSX, pero se puede estilizar para un futuro uso */
 .login-container2 {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   padding: 2rem;
-   border: 8px solid #fc0;
-   border-radius: 20px;
-   background-color: rgba(240, 238, 238, 0.9);
-   width: 380px;
-   margin: 2rem;
-   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 8px solid #fc0;
+  border-radius: 20px;
+  background-color: rgba(240, 238, 238, 0.9);
+  width: 380px;
+  margin: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
 }
 
-.error-message{
+.error-message {
   color: rgb(151, 13, 13);
 }
 
-.color{
+.color {
   color: #555;
 }
 
 /* --- ESTILO AÑADIDO: Enlace de "Olvidé mi Contraseña" --- */
 .forgot-password-link {
-   width: 100%; /* Ocupa todo el ancho */
-   text-align: right; /* Alinea el enlace a la derecha */
-   margin-bottom: 15px; /* Espacio antes del botón o del texto de registro */
+  width: 100%; /* Ocupa todo el ancho */
+  text-align: right; /* Alinea el enlace a la derecha */
+  margin-bottom: 15px; /* Espacio antes del botón o del texto de registro */
 }
 
 /* Reutilizar el estilo base de los enlaces para el enlace de olvido */
 .forgot-password-link a {
-   font-size: 14px;
-   color: #007bff;
-   text-decoration: none;
-   transition: color 0.3s;
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
 .forgot-password-link a:hover {
-   text-decoration: underline;
-   color: #0056b3;
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+.colortexto {
+  color: #ccc;
 }

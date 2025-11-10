@@ -60,11 +60,11 @@ const ZONAS_ESTATICAS = {
   "Puerto Madero": {
     caminosNombre: "Reserva Ecologica",
   },
-    "Palermo": {
-      caminosNombre: "Paseo El Rosedal"
+  Palermo: {
+    caminosNombre: "Paseo El Rosedal",
   },
   "Parque Patricios": {
-    caminosNombre: "Parque Florentino"
+    caminosNombre: "Parque Florentino",
   },
 };
 
@@ -119,7 +119,6 @@ export default function Dashboard() {
   const [lineasVisibles, setLineasVisibles] = useState({}); // Estado de visibilidad (ej: { '55': true, '103': false })
   const [lineasGeoJSON, setLineasGeoJSON] = useState({}); // GeoJSON de las rutas (ej: { '55': {type: 'FeatureCollection', ...} })
 
-
   // -----------------------------
   // 1️⃣ Cargar paradas
   // -----------------------------
@@ -144,7 +143,10 @@ export default function Dashboard() {
         // Asume que tu Flask devuelve {'lineas': ['55', '103', '7', ...]}
         setLineasDisponibles(data.lineas || []);
       } catch (error) {
-        console.error("Fallo la carga de la lista de líneas desde Flask:", error);
+        console.error(
+          "Fallo la carga de la lista de líneas desde Flask:",
+          error
+        );
         setLineasDisponibles([]);
       }
     }
@@ -297,57 +299,62 @@ export default function Dashboard() {
     }
   };
 
-
   // 🚌 NUEVA FUNCIÓN: Alternar visibilidad de la línea de colectivo
   const toggleLinea = async (numeroLinea) => {
     // 1. Invierte el estado de visibilidad
     const isVisible = !lineasVisibles[numeroLinea];
 
     // 2. Actualiza el estado de visibilidad inmediatamente
-    setLineasVisibles(prev => ({
-        ...prev,
-        [numeroLinea]: isVisible 
+    setLineasVisibles((prev) => ({
+      ...prev,
+      [numeroLinea]: isVisible,
     }));
 
     if (isVisible) {
-        // Si se va a mostrar, y no tengo el GeoJSON, lo cargo
-        if (!lineasGeoJSON[numeroLinea]) {
-            try {
-                // 🚨 Asume que tu backend tiene una ruta para el GeoJSON de la línea (ej: /linea/55/ruta)
-                const response = await fetch(`${FLASK_API_BASE_URL}/linea/${numeroLinea}/ruta`); 
-                if (!response.ok) {
-                    throw new Error(`Error al cargar la ruta de la línea ${numeroLinea}`);
-                }
-                const data = await response.json();
-                
-                // 3. Guarda el GeoJSON cargado
-                setLineasGeoJSON(prev => ({
-                    ...prev,
-                    [numeroLinea]: data.ruta_geojson 
-                }));
-            } catch (error) {
-                console.error(`Error cargando GeoJSON de la línea ${numeroLinea}:`, error);
-                // Si falla, asegúrate de que el botón se desactive para evitar confusión
-                setLineasVisibles(prev => ({ ...prev, [numeroLinea]: false }));
-            }
+      // Si se va a mostrar, y no tengo el GeoJSON, lo cargo
+      if (!lineasGeoJSON[numeroLinea]) {
+        try {
+          // 🚨 Asume que tu backend tiene una ruta para el GeoJSON de la línea (ej: /linea/55/ruta)
+          const response = await fetch(
+            `${FLASK_API_BASE_URL}/linea/${numeroLinea}/ruta`
+          );
+          if (!response.ok) {
+            throw new Error(
+              `Error al cargar la ruta de la línea ${numeroLinea}`
+            );
+          }
+          const data = await response.json();
+
+          // 3. Guarda el GeoJSON cargado
+          setLineasGeoJSON((prev) => ({
+            ...prev,
+            [numeroLinea]: data.ruta_geojson,
+          }));
+        } catch (error) {
+          console.error(
+            `Error cargando GeoJSON de la línea ${numeroLinea}:`,
+            error
+          );
+          // Si falla, asegúrate de que el botón se desactive para evitar confusión
+          setLineasVisibles((prev) => ({ ...prev, [numeroLinea]: false }));
         }
+      }
     }
     // Si se va a ocultar, solo se encarga la función de renderizado.
   };
-  
+
   // Estilo de caminos
   const estiloCaminos = {
     color: "orange",
     weight: 3,
   };
-  
+
   // 🚌 Estilo para las rutas de colectivo
   const estiloLineaColectivo = {
     color: "#6f42c1", // Un color distintivo, como púrpura
     weight: 4,
     opacity: 0.7,
   };
-
 
   const zonasArray = Object.keys(zonasDisponibles);
 
@@ -387,27 +394,33 @@ export default function Dashboard() {
               )}
             </div>
           ))}
-          
+
         {/* --- 🚌 NUEVA SECCIÓN PARA LÍNEAS DE COLECTIVO --- */}
         <div className="lineas-filtro">
-            <h3>Filtro de Líneas de Colectivo</h3>
-            <div className="lineas-contenedor">
-                {lineasDisponibles.length === 0 ? (
-                    <p>Cargando líneas...</p>
-                ) : (
-                    lineasDisponibles.map(linea => (
-                        <button
-                            key={linea}
-                            className={`linea-chip ${lineasVisibles[linea] ? 'activa' : ''}`}
-                            onClick={() => toggleLinea(linea)}
-                        >
-                            {linea}
-                        </button>
-                    ))
-                )}
-            </div>
+          <h3>Filtro de Líneas de Colectivo</h3>
+          <div className="lineas-contenedor">
+            {lineasDisponibles.length === 0 ? (
+              <p>Cargando líneas...</p>
+            ) : (
+              lineasDisponibles.map((linea) => (
+                <button
+                  key={linea}
+                  className={`linea-chip ${
+                    lineasVisibles[linea] ? "activa" : ""
+                  }`}
+                  onClick={() => toggleLinea(linea)}
+                >
+                  {linea}
+                </button>
+              ))
+            )}
+          </div>
         </div>
         {/* -------------------------------------------------- */}
+      </div>
+      <div className="bannerbuscardor">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F128%2F5965%2F5965132.png&f=1&nofb=1&ipt=c8f4cb20b2d5b09eb1ff0aded478bed4515e9eea711e0559b0429ff9752f0d7e"></img>
+        <h1></h1>
       </div>
 
       {/* Mapa principal */}
@@ -426,25 +439,31 @@ export default function Dashboard() {
           caminosData={caminosData}
           zonaSeleccionada={zonaSeleccionada}
         />
-        
+
         {/* Caminos peatonales */}
         {caminosData && <GeoJSON data={caminosData} style={estiloCaminos} />}
-        
+
         {/* Zona seleccionada: Ahora solo se renderiza si zonaData tiene algo */}
         {zonaData && estiloZonaSeleccionada && (
           <GeoJSON data={zonaData} style={estiloZonaSeleccionada} />
         )}
-        
+
         {/* 🚌 Rutas de Colectivo */}
-        {Object.keys(lineasVisibles).map(linea => {
-            const isVisible = lineasVisibles[linea];
-            const geoJson = lineasGeoJSON[linea];
-            
-            // Renderiza el GeoJSON si está visible Y se cargó la data
-            if (isVisible && geoJson) {
-                return <GeoJSON key={`linea-${linea}`} data={geoJson} style={estiloLineaColectivo} />;
-            }
-            return null;
+        {Object.keys(lineasVisibles).map((linea) => {
+          const isVisible = lineasVisibles[linea];
+          const geoJson = lineasGeoJSON[linea];
+
+          // Renderiza el GeoJSON si está visible Y se cargó la data
+          if (isVisible && geoJson) {
+            return (
+              <GeoJSON
+                key={`linea-${linea}`}
+                data={geoJson}
+                style={estiloLineaColectivo}
+              />
+            );
+          }
+          return null;
         })}
 
         {/* Paradas */}

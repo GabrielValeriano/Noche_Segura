@@ -84,11 +84,11 @@ const Login = () => {
           <h4>¿No tiene cuenta?</h4>
           <a href="/Register">Registrate</a>
         </div>
-
-        {error && <p className="error-message">{error}</p>}
         <div className="button-group">
           <button type="submit">Ingresar</button>
         </div>
+        {error && <p className="error-message">{error}</p>}
+
       </form>
     </div>
   );
