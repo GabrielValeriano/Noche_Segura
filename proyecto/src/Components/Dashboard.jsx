@@ -104,7 +104,7 @@ function MapZoomer({ zonaData, caminosData, zonaSeleccionada }) {
 // ----------------------------------------------------
 
 export default function Dashboard() {
-  // ESTADOS MOVIDOS DENTRO DE LA FUNCIÓN
+  // ESTADOS EXISTENTES
   const [paradas, setParadas] = useState([]);
   const [zonasDisponibles, setZonasDisponibles] = useState({});
   const [zonasNivelesDB, setZonasNivelesDB] = useState(null);
@@ -114,14 +114,41 @@ export default function Dashboard() {
   const [caminosVisibles, setCaminosVisibles] = useState({});
   const [estiloZonaSeleccionada, setEstiloZonaSeleccionada] = useState(null);
 
+  // 🚌 NUEVOS ESTADOS PARA LÍNEAS DE COLECTIVO
+  const [lineasDisponibles, setLineasDisponibles] = useState([]); // Lista de líneas (ej: ['55', '103', '7'])
+  const [lineasVisibles, setLineasVisibles] = useState({}); // Estado de visibilidad (ej: { '55': true, '103': false })
+  const [lineasGeoJSON, setLineasGeoJSON] = useState({}); // GeoJSON de las rutas (ej: { '55': {type: 'FeatureCollection', ...} })
+
+
   // -----------------------------
-  // 1️⃣ Cargar paradas (MOVIDO Y CORREGIDO)
+  // 1️⃣ Cargar paradas
   // -----------------------------
   useEffect(() => {
     fetch(`${FLASK_API_BASE_URL}/paradas`)
       .then((res) => res.json())
       .then((data) => setParadas(data))
       .catch((err) => console.error("Error cargando paradas:", err));
+  }, []);
+
+  // -----------------------------
+  // 🚌 NUEVO EFECTO: Cargar lista de líneas
+  // -----------------------------
+  useEffect(() => {
+    async function fetchLineas() {
+      try {
+        const response = await fetch(`${FLASK_API_BASE_URL}/lineas`);
+        if (!response.ok) {
+          throw new Error("Error al obtener la lista de líneas del backend");
+        }
+        const data = await response.json();
+        // Asume que tu Flask devuelve {'lineas': ['55', '103', '7', ...]}
+        setLineasDisponibles(data.lineas || []);
+      } catch (error) {
+        console.error("Fallo la carga de la lista de líneas desde Flask:", error);
+        setLineasDisponibles([]);
+      }
+    }
+    fetchLineas();
   }, []);
 
   // -----------------------------------------------------------------
@@ -232,16 +259,14 @@ export default function Dashboard() {
       setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: false }));
       setCaminosData(null);
 
-      // RESTAURAR LA ZONA: Vuelve a cargar la geometría de la zona para que MapZoomer la enfoque.
-      // Puedes reutilizar la lógica de carga de zona o, más simple, cargar la data que ya tienes.
-      // Para este ejemplo, llamaremos a la función de selección de zona para restaurar la vista.
-      manejarSeleccionZona(nombreZona); // Llama al manejador de zona para recargar/enfocar la zona
+      // RESTAURAR LA ZONA: Llama al manejador de zona para recargar/enfocar la zona
+      manejarSeleccionZona(nombreZona);
     } else {
       // Caso 2: MOSTRAR CAMINOS (y ocultar la zona)
 
       // 🚨 Paso 1: OCULTAR ZONA MARCADA
-      setZonaData(null); // Esto hace que el GeoJSON de la zona deje de renderizarse
-      setEstiloZonaSeleccionada(null); // Opcional, pero buena práctica
+      setZonaData(null);
+      setEstiloZonaSeleccionada(null);
 
       const apiUrl = `${FLASK_API_BASE_URL}/ruta/${nombreRuta}`;
 
@@ -259,9 +284,6 @@ export default function Dashboard() {
             // 🚨 Paso 2: CARGAR CAMINOS Y USAR SU GEOMETRÍA PARA EL ZOOM
             setCaminosData(data.caminos_geojson);
 
-            // MapZoomer reaccionará a 'caminosData' para hacer zoom.
-            // Para esto, necesitamos que MapZoomer pueda escuchar tanto 'zonaData' como 'caminosData'.
-
             setCaminosVisibles((prev) => ({ ...prev, [nombreZona]: true }));
           } else {
             console.error(
@@ -275,11 +297,57 @@ export default function Dashboard() {
     }
   };
 
+
+  // 🚌 NUEVA FUNCIÓN: Alternar visibilidad de la línea de colectivo
+  const toggleLinea = async (numeroLinea) => {
+    // 1. Invierte el estado de visibilidad
+    const isVisible = !lineasVisibles[numeroLinea];
+
+    // 2. Actualiza el estado de visibilidad inmediatamente
+    setLineasVisibles(prev => ({
+        ...prev,
+        [numeroLinea]: isVisible 
+    }));
+
+    if (isVisible) {
+        // Si se va a mostrar, y no tengo el GeoJSON, lo cargo
+        if (!lineasGeoJSON[numeroLinea]) {
+            try {
+                // 🚨 Asume que tu backend tiene una ruta para el GeoJSON de la línea (ej: /linea/55/ruta)
+                const response = await fetch(`${FLASK_API_BASE_URL}/linea/${numeroLinea}/ruta`); 
+                if (!response.ok) {
+                    throw new Error(`Error al cargar la ruta de la línea ${numeroLinea}`);
+                }
+                const data = await response.json();
+                
+                // 3. Guarda el GeoJSON cargado
+                setLineasGeoJSON(prev => ({
+                    ...prev,
+                    [numeroLinea]: data.ruta_geojson 
+                }));
+            } catch (error) {
+                console.error(`Error cargando GeoJSON de la línea ${numeroLinea}:`, error);
+                // Si falla, asegúrate de que el botón se desactive para evitar confusión
+                setLineasVisibles(prev => ({ ...prev, [numeroLinea]: false }));
+            }
+        }
+    }
+    // Si se va a ocultar, solo se encarga la función de renderizado.
+  };
+  
   // Estilo de caminos
   const estiloCaminos = {
     color: "orange",
     weight: 3,
   };
+  
+  // 🚌 Estilo para las rutas de colectivo
+  const estiloLineaColectivo = {
+    color: "#6f42c1", // Un color distintivo, como púrpura
+    weight: 4,
+    opacity: 0.7,
+  };
+
 
   const zonasArray = Object.keys(zonasDisponibles);
 
@@ -287,6 +355,7 @@ export default function Dashboard() {
     <div className="dashboard">
       {/* Panel lateral de selección */}
       <div className="sidebar">
+        {/* Sección de ZONAS */}
         <h3>Zonas disponibles</h3>
 
         {zonasNivelesDB === null && <p>Cargando niveles de seguridad...</p>}
@@ -318,6 +387,27 @@ export default function Dashboard() {
               )}
             </div>
           ))}
+          
+        {/* --- 🚌 NUEVA SECCIÓN PARA LÍNEAS DE COLECTIVO --- */}
+        <div className="lineas-filtro">
+            <h3>Filtro de Líneas de Colectivo</h3>
+            <div className="lineas-contenedor">
+                {lineasDisponibles.length === 0 ? (
+                    <p>Cargando líneas...</p>
+                ) : (
+                    lineasDisponibles.map(linea => (
+                        <button
+                            key={linea}
+                            className={`linea-chip ${lineasVisibles[linea] ? 'activa' : ''}`}
+                            onClick={() => toggleLinea(linea)}
+                        >
+                            {linea}
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
+        {/* -------------------------------------------------- */}
       </div>
 
       {/* Mapa principal */}
@@ -336,12 +426,27 @@ export default function Dashboard() {
           caminosData={caminosData}
           zonaSeleccionada={zonaSeleccionada}
         />
+        
         {/* Caminos peatonales */}
         {caminosData && <GeoJSON data={caminosData} style={estiloCaminos} />}
+        
         {/* Zona seleccionada: Ahora solo se renderiza si zonaData tiene algo */}
         {zonaData && estiloZonaSeleccionada && (
           <GeoJSON data={zonaData} style={estiloZonaSeleccionada} />
         )}
+        
+        {/* 🚌 Rutas de Colectivo */}
+        {Object.keys(lineasVisibles).map(linea => {
+            const isVisible = lineasVisibles[linea];
+            const geoJson = lineasGeoJSON[linea];
+            
+            // Renderiza el GeoJSON si está visible Y se cargó la data
+            if (isVisible && geoJson) {
+                return <GeoJSON key={`linea-${linea}`} data={geoJson} style={estiloLineaColectivo} />;
+            }
+            return null;
+        })}
+
         {/* Paradas */}
         {paradas.map((parada) => (
           <Marker
@@ -358,8 +463,7 @@ export default function Dashboard() {
                 : "No registradas"}
             </Popup>
           </Marker>
-        ))}{" "}
-        {/* Cierre corregido: )) } */}
+        ))}
       </MapContainer>
     </div>
   );
