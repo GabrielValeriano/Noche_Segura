@@ -22,7 +22,9 @@ body {
   align-items: center;
   padding: 40px;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.7333);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255, 255, 255, 0.3);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   width: 380px;
   max-width: 90%;
@@ -41,40 +43,41 @@ h2 {
 .input-wrapper {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 20px; 
+}
+
+/* 🚨 REGLA 2: Sobrescribe el margen SOLO para el segundo input (Contraseña) */
+/* El segundo .input-wrapper es el que precede al enlace de "Olvidé mi contraseña" */
+.input-wrapper:nth-child(2) {
+  /* Reducido a 5px o 10px para pegarlo al enlace */
+  margin-bottom: 2px; /* Prueba con 8px para una separación mínima */
 }
 
 .input-icon {
   position: absolute;
   /* --- CAMBIOS AQUÍ --- */
-  right: 15px;     	/* Cambiamos 'left' por 'right' */
-  left: auto;      	/* Aseguramos que 'left' no tenga valor */
-  /* --- FIN CAMBIOS --- */
-  top: 50%;      	 
-  transform: translateY(-50%);
-  color: #888;  	 
-  font-size: 16px;
-}
+  right: 20px; /* Cambiamos 'left' por 'right' */
+  left: auto; /* Aseguramos que 'left' no tenga valor */
 
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 19px;
+}
 
 /* --- (MODIFICADO) Ajuste a los Inputs --- */
 
 /* --- Estilo de los inputs y su espaciado --- */
-.login-container > div > div {
-  margin-bottom: 20px; /* Espaciado entre cada input */
-  width: 100%;
-}
 
-input[type="email"], input[type="password"] {
+input[type="email"],
+input[type="password"] {
   width: 100%;
   /* --- CAMBIOS AQUÍ --- */
-  padding: 12px 45px 12px 12px; /* <-- Acolchado DERECHO aumentado a 45px, el IZQUIERDO vuelve a 12px */
-  /* --- FIN CAMBIOS --- */
+  padding: 12px 50px 12px 12px; /* Acolchado DERECHO aumentado a 50px */ /* --- FIN CAMBIOS --- */
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  box-sizing: border-box;
+
 }
 
 input:focus {
@@ -94,14 +97,15 @@ input:focus {
 
 .login-container a {
   font-size: 14px;
-  color: #007bff;
+  color: #003cff;
   text-decoration: none;
   transition: color 0.3s;
+
 }
 
 .login-container a:hover {
   text-decoration: underline;
-  color: #0056b3;
+  color: #003cff;
 }
 
 /* --- Estilo del botón --- */
@@ -122,22 +126,6 @@ button:hover {
   background-color: #fc9b1c;
 }
 
-/* El segundo contenedor no tiene contenido en tu JSX, pero se puede estilizar para un futuro uso */
-.login-container2 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  border: 8px solid #fc0;
-  border-radius: 20px;
-  background-color: rgba(240, 238, 238, 0.9);
-  width: 380px;
-  margin: 2rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
 .error-message {
   color: rgb(151, 13, 13);
 }
@@ -149,23 +137,22 @@ button:hover {
 /* --- ESTILO AÑADIDO: Enlace de "Olvidé mi Contraseña" --- */
 .forgot-password-link {
   width: 100%; /* Ocupa todo el ancho */
-  text-align: right; /* Alinea el enlace a la derecha */
   margin-bottom: 15px; /* Espacio antes del botón o del texto de registro */
 }
 
 /* Reutilizar el estilo base de los enlaces para el enlace de olvido */
 .forgot-password-link a {
   font-size: 14px;
-  color: #007bff;
+  color: #003cff;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .forgot-password-link a:hover {
   text-decoration: underline;
-  color: #0056b3;
+  color: #003cff;
 }
 
-.colortexto {
-  color: #ccc;
+.centrar {
+   text-align: center;
 }

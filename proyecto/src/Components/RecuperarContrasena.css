@@ -5,13 +5,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px;
+  padding: 30px;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.7333);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255, 255, 255, 0.3);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  width: 380px;
-  max-width: 90%;
-  box-sizing: border-box;
+  width: 400px;
+  max-width: 100%;
+  box-sizing: border-box; /* Asegura que el padding no aumente el ancho */
+  text-align: center;
 }
 
 /* --- Estilo del título --- */
@@ -37,8 +40,7 @@ select {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  box-sizing: border-box;
+
   /* Para que el select no se vea distinto */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #ffffff;
@@ -49,10 +51,9 @@ select:invalid {
   color: #757575;
 }
 
-input:focus,
-select:focus {
+input:focus{
   outline: none;
-  border-color: #007bff;
+  border-color: #007bff; /* Un color azul profesional al enfocar */
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
@@ -83,16 +84,16 @@ login-container h4,
   display: inline;
 }
 
-.register-container a {
+.recuperar-container a {
   font-size: 14px;
-  color: #007bff;
+  color: #003cff;
   text-decoration: none;
   transition: color 0.3s;
 }
 
-.register-container a:hover {
+.recuperar-container a:hover {
   text-decoration: underline;
-  color: #0056b3;
+  color: #003cff;
 }
 
 /* --- Estilo del botón --- */
@@ -134,5 +135,9 @@ button:hover {
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #003cff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
 }

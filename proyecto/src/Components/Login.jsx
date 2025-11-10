@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaUser, FaLock } from "react-icons/fa";
 import "./Login.css"; // importamos los estilos
 
 const Login = () => {
@@ -27,34 +28,21 @@ const Login = () => {
         return;
       }
 
-    localStorage.setItem("usuario", JSON.stringify(data));
-    window.location.href = "/Dashboard"; // redirige al dashboard
-
+      localStorage.setItem("usuario", JSON.stringify(data));
+      window.location.href = "/Dashboard"; // redirige al dashboard
     } catch (err) {
       setError("Error de conexión con el servidor");
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("usuario");
-    setUsuario(null);
-  };
-
-  if (usuario) {
-    return (
-      <div className="login-container2">
-        <h2>Bienvenido {usuario.nombre_usuario}</h2>
-        <p className="color">Correo: {usuario.email}</p>
-        <button onClick={handleLogout}>Cerrar sesión</button>
-      </div>
-    );
-  }
-
   return (
     <div className="login-container">
       <h2>Iniciar Sesión</h2>
       <form onSubmit={handleLogin}>
-        <div>
+
+        {/* 🚨 CORRECCIÓN AQUÍ: Cambiado de 'input-wrappet' a 'input-wrapper' */}
+        <div className="input-wrapper">
+          <FaUser className="input-icon"/>
           <input
             type="email"
             value={email}
@@ -63,7 +51,10 @@ const Login = () => {
             required
           />
         </div>
-        <div>
+        
+        {/* 🚨 CORRECCIÓN AQUÍ: Cambiado de 'input-wrappet' a 'input-wrapper' */}
+        <div className="input-wrapper">
+          <FaLock className="input-icon"/>
           <input
             type="password"
             value={contrasena}
@@ -78,17 +69,16 @@ const Login = () => {
           {/* Este enlace debe apuntar a la ruta de tu componente de recuperación */}
           <a href="/RecuperarContrasena">¿Olvidaste tu contraseña?</a>
         </div>
-
-        {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
-        <div>
-          <h4>¿No tiene cuenta?</h4>
-          <a href="/Register">Registrate</a>
-        </div>
+        {error && <p className="error-message">{error}</p>}
         <div className="button-group">
           <button type="submit">Ingresar</button>
         </div>
-        {error && <p className="error-message">{error}</p>}
 
+        {/* TEXTO Y LINK DE REGISTRO EXACTAMENTE COMO ESTABA */}
+        <div className="centrar">
+          <h4>¿No tiene cuenta?</h4>
+          <a href="/Register">Registrate</a>
+        </div>
       </form>
     </div>
   );
