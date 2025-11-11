@@ -131,6 +131,7 @@ const RecuperarContrasena = () => {
 
       {/* --- FORMULARIO DEL PASO 2 --- */}
       {paso === 2 && (
+       <div className="RecuperarContrasena">
         <form onSubmit={handleRestablecer}>
           <div className="pregunta-container">
             <label style={{ color: "#555", fontSize: "14px" }}>
@@ -180,6 +181,7 @@ const RecuperarContrasena = () => {
             <a href="/">Inicia Sesión</a>
           </div>
         </form>
+        </div>
       )}
     </div>
   );

@@ -40,10 +40,12 @@ select {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
+  margin-bottom: 10px;
 
   /* Para que el select no se vea distinto */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #ffffff;
+
 }
 
 /* Color del placeholder del select cuando no se ha elegido nada */

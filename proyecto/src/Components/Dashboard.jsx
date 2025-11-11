@@ -419,8 +419,15 @@ export default function Dashboard() {
         {/* -------------------------------------------------- */}
       </div>
       <div className="bannerbuscardor">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F128%2F5965%2F5965132.png&f=1&nofb=1&ipt=c8f4cb20b2d5b09eb1ff0aded478bed4515e9eea711e0559b0429ff9752f0d7e"></img>
-        <h1></h1>
+          <div className="overlay-content">
+              {/* 🚨 Usa la variable importada aquí */}
+              <img 
+                  src= "/imagenes/luna.svg"
+                  alt="Logo del Sistema" 
+                  className="overlay-image"
+              />
+              <h1 className="overlay-title">Noche Segura</h1>
+          </div>
       </div>
 
       {/* Mapa principal */}
