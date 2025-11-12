@@ -75,29 +75,32 @@ function MapZoomer({ zonaData, caminosData, zonaSeleccionada }) {
   const map = useMap();
 
   useEffect(() => {
-    // 🚨 1. SOLUCIÓN ESPECÍFICA PARA CAMINOS DE RESERVA ECOLÓGICA (Puerto Madero)
-    if (zonaSeleccionada === "Puerto Madero" && caminosData) {
-      console.log(
-        "Detectados caminos de 'Reserva Ecologica'. Aplicando zoom fijo."
-      );
-      // Coordenadas aproximadas del centro de la Reserva Ecológica (Zoom 15 para más detalle)
-      map.flyTo([-34.607044, -58.35225], 14.7);
-      return;
+    // Si no hay datos de zona ni de caminos, no hacemos zoom.
+    if (!zonaData && !caminosData) {
+        return;
     }
 
-    // 3. Comportamiento normal (para Caballito, o si los GeoJSON de zona/caminos son correctos)
-    const dataToUse = caminosData || zonaData;
+    // El código específico de Puerto Madero solo se ejecuta si hay caminosData, 
+    // así que no afecta la zona.
+
+    // 🚨 Esta es la parte crucial que maneja ZONAS y CAMINOS
+    const dataToUse = caminosData || zonaData; 
 
     if (dataToUse) {
-      const geoJsonLayer = L.geoJson(dataToUse);
-      const bounds = geoJsonLayer.getBounds();
+      // 1. Creamos una capa GeoJSON temporal SÓLO con los datos de zona/caminos.
+      const geoJsonLayer = L.geoJson(dataToUse); 
+      
+      // 2. Obtenemos los límites SÓLO de esa capa temporal.
+      const bounds = geoJsonLayer.getBounds(); 
 
       if (bounds.isValid()) {
-        // Para las zonas buenas, ajusta el zoom al límite del GeoJSON
+        // 3. Forzamos el mapa a ajustarse SÓLO a estos límites.
         map.fitBounds(bounds, { padding: [40, 40] });
+      } else {
+        console.error("Límites de GeoJSON no válidos.");
       }
     }
-  }, [zonaData, caminosData, zonaSeleccionada, map]);
+  }, [zonaData, caminosData, zonaSeleccionada, map]); // Dependencias
 
   return null;
 }

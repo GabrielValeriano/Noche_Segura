@@ -9,16 +9,16 @@
 
 /* El mapa aún ocupa el 75% del ancho a la izquierda */
 .map {
-  height: 100%;
+  height: 84%;
   width: 76%;
   margin-left: auto;
-  top: 16.8%;
+  top: 16%;
 }
 
 .bannerbuscardor {
   position: absolute;
   top: 0;
-  height: 15%;
+  height: 16%;
 
   /* 1. Definir el mismo ancho que el mapa (67%) */
   width: 100%;
@@ -30,7 +30,7 @@
   /* La propiedad pointer-events: none; es útil si quieres que los clics
      pasen a través del overlay y lleguen al mapa de abajo */
   pointer-events: none;
-  border-bottom: solid 10px rgb(61, 79, 163);
+  border-bottom: solid 5px rgb(61, 79, 163);
   font-family: 'Montserrat', sans-serif;
 
 }
@@ -47,9 +47,10 @@
 
 /* 🚨 NUEVO: Estilos para la imagen */
 .overlay-image {
-    width: 140px;
+  margin: 0.5%;
+    width: 11%;
       /* Tamaño del logo (ajusta según tu logo) */
-      height: 100px;
+    height: 11%;
 
 
   object-fit: contain;
@@ -76,13 +77,13 @@
 .sidebar {
   /* Posicionamiento Absoluto: Flota sobre el mapa */
   position: absolute;
-  top: 16.8%;
+  top: 16%;
   /* 🚨 CAMBIO CLAVE: Mueve el banner a la derecha */
 
   /* (Se eliminó 'left: 20px;') */
 
   width: 20%;
-  height: 80%;
+  height: 75%;
   padding: 2%;
 
   background-color: rgb(31, 43, 83);
