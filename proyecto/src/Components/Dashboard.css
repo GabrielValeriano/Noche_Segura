@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   /* Centra la imagen y el texto a la misma altura */
-
+  gap: 2%;
   /* Espacio entre la imagen y el texto */
   pointer-events: auto;
   /* Permite interactuar con este div (y su contenido) */
@@ -47,12 +47,12 @@
 
 /* 🚨 NUEVO: Estilos para la imagen */
 .overlay-image {
-  margin: 0.5%;
-    width: 11%;
+
+    width: 6.8%;
       /* Tamaño del logo (ajusta según tu logo) */
-    height: 11%;
+    height: 6.8%;
 
-
+    margin-left: 2%;
   object-fit: contain;
   /* Asegura que la imagen se vea completa */
 }
@@ -68,7 +68,7 @@
 
   /* 💥 CAMBIO CLAVE: Usa la propiedad font-family */
 
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   /* Reemplaza 'Montserrat' por tu fuente elegida */
 }
 /* ---------------------------------------------------- */
@@ -83,14 +83,14 @@
   /* (Se eliminó 'left: 20px;') */
 
   width: 20%;
-  height: 75%;
+  height: 74.6%;
   padding: 2%;
 
   background-color: rgb(31, 43, 83);
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra elegante */
 
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   text-align: left;
 }
 
@@ -106,15 +106,13 @@
 /* ---------------------------------------------------- */
 
 /* Contenedor de zonas si tienes botones uno debajo del otro */
-.zonas-disponibles {
-  margin-bottom: 20px;
-}
 
 .zona-btn {
+
   display: block;
   width: 95%; /* Ocupa casi todo el ancho de la sidebar */
-  padding: 10px 15px;
-  margin-bottom: 4px;
+  padding: 15px 15px;
+  margin-bottom: 20px;
   text-align: left;
   border: none;
   border-radius: 4px; /* Un poco de borde redondeado */
@@ -123,7 +121,8 @@
   font-size: 14px;
   color: #dae3ff;
   transition: background-color 0.15s ease;
-  margin-bottom: 8px;
+
+
 }
 
 .zona-btn:hover {
@@ -140,8 +139,8 @@
 .caminos-btn {
   display: block;
   width: 90%;
-  margin: 5px 0 15px 10px; /* Margen para anidarlo debajo de la zona */
-  padding: 5px 10px;
+  margin: 1% 0 7% 2.5%; /* Margen para anidarlo debajo de la zona */
+  padding: 8px 30px;
   border-radius: 4px;
   background-color: #3890b9;
   color: rgb(255, 255, 255);

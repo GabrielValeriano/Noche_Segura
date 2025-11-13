@@ -10,6 +10,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./Dashboard.css";
+import * as turf from "@turf/turf"; 
 
 // URL base de tu backend Flask (Ajusta el puerto si usas PHP)
 const FLASK_API_BASE_URL = "http://localhost:5000";
@@ -95,7 +96,7 @@ function MapZoomer({ zonaData, caminosData, zonaSeleccionada }) {
 
       if (bounds.isValid()) {
         // 3. Forzamos el mapa a ajustarse SÓLO a estos límites.
-        map.fitBounds(bounds, { padding: [40, 40] });
+        map.fitBounds(bounds, { padding: [10, 10] });
       } else {
         console.error("Límites de GeoJSON no válidos.");
       }
@@ -121,7 +122,7 @@ export default function Dashboard() {
   const [lineasDisponibles, setLineasDisponibles] = useState([]); // Lista de líneas (ej: ['55', '103', '7'])
   const [lineasVisibles, setLineasVisibles] = useState({}); // Estado de visibilidad (ej: { '55': true, '103': false })
   const [lineasGeoJSON, setLineasGeoJSON] = useState({}); // GeoJSON de las rutas (ej: { '55': {type: 'FeatureCollection', ...} })
-
+  const [paradasFiltradas, setParadasFiltradas] = useState([]);
   // -----------------------------
   // 1️⃣ Cargar paradas
   // -----------------------------
@@ -155,6 +156,37 @@ export default function Dashboard() {
     }
     fetchLineas();
   }, []);
+
+  useEffect(() => {
+    if (zonaData && paradas.length > 0) {
+      try {
+        // Asegúrate de que el GeoJSON de la zona sea un Polígono (o MultiPolígono)
+        const zonaPolygon = zonaData; 
+        
+        const filtered = paradas.filter(parada => {
+          // Crea un punto turf a partir de las coordenadas de la parada
+          // Nota: Leaflet/GeoJSON usa [lng, lat], pero turf.point a menudo requiere [lng, lat] también.
+          // Revisar el orden de tus datos: si son [lat, lng], podrías necesitar [parada.longitud, parada.latitud]
+          const punto = turf.point([parada.longitud, parada.latitud]); 
+
+          // Comprueba si el punto está dentro del polígono de la zona
+          const estaDentro = turf.booleanPointInPolygon(punto, zonaPolygon);
+          
+          return estaDentro;
+        });
+
+        setParadasFiltradas(filtered);
+
+      } catch (error) {
+        console.error("Error al filtrar paradas con Turf:", error);
+        setParadasFiltradas([]); // Si hay un error, limpia el filtro
+      }
+    } else {
+      // Limpia las paradas filtradas cuando no hay zona seleccionada
+      setParadasFiltradas([]);
+    }
+  }, [zonaData, paradas]); // Dependencias: se ejecuta con cada nueva zona o carga inicial de paradas
+
 
   // -----------------------------------------------------------------
   // EFECTO 1: Carga inicial de niveles de seguridad desde el backend
@@ -398,34 +430,15 @@ export default function Dashboard() {
             </div>
           ))}
 
-        {/* --- 🚌 NUEVA SECCIÓN PARA LÍNEAS DE COLECTIVO --- */}
-        <div className="lineas-filtro">
-          <h3>Filtro de Líneas de Colectivo</h3>
-          <div className="lineas-contenedor">
-            {lineasDisponibles.length === 0 ? (
-              <p>Cargando líneas...</p>
-            ) : (
-              lineasDisponibles.map((linea) => (
-                <button
-                  key={linea}
-                  className={`linea-chip ${
-                    lineasVisibles[linea] ? "activa" : ""
-                  }`}
-                  onClick={() => toggleLinea(linea)}
-                >
-                  {linea}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
+ 
+
         {/* -------------------------------------------------- */}
       </div>
       <div className="bannerbuscardor">
           <div className="overlay-content">
               {/* 🚨 Usa la variable importada aquí */}
               <img 
-                  src= "/imagenes/luna.svg"
+                  src= "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2F170x%2F64%2F20%2F4d%2F64204d1c91aef3c9fd37dc00eab1e60e.jpg&f=1&nofb=1&ipt=8b9f3e56a167cff53389a91f2e2f3803c710fcb59d27a7bb06d8dda76de79580"
                   alt="Logo del Sistema" 
                   className="overlay-image"
               />
@@ -477,22 +490,25 @@ export default function Dashboard() {
         })}
 
         {/* Paradas */}
-        {paradas.map((parada) => (
-          <Marker
-            key={parada.parada_id}
-            position={[parada.latitud, parada.longitud]}
-            icon={iconoParada}
-          >
-            <Popup>
-              <strong>{parada.nombre_calle}</strong>
-              <br />
-              Líneas:{" "}
-              {parada.lineas?.length
-                ? parada.lineas.join(", ")
-                : "No registradas"}
-            </Popup>
-          </Marker>
-        ))}
+        {zonaSeleccionada && (
+          // Paradas
+          paradas.map((parada) => (
+            <Marker
+              key={parada.parada_id}
+              position={[parada.latitud, parada.longitud]}
+              icon={iconoParada}
+            >
+              <Popup>
+                <strong>{parada.nombre_calle}</strong>
+                <br />
+                Líneas:{" "}
+                {parada.lineas?.length
+                  ? parada.lineas.join(", ")
+                  : "No registradas"}
+              </Popup>
+            </Marker>
+          ))
+          )}
       </MapContainer>
     </div>
   );
