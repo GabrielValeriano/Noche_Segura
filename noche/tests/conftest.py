@@ -1,18 +1,10 @@
 import pytest
-from app import create_app # Importamos la fábrica
+from app import app as flask_app
 
-@pytest.fixture(scope='module')
-def app():
+@pytest.fixture
+def client():
     """Instancia de la aplicación Flask para pruebas."""
-    app = create_app()
-    app.config.update({
-        "TESTING": True,
-        # Aquí puedes sobreescribir configuraciones, ej. una DB de prueba
-    })
+    flask_app.config.update(TESTING = True)
+    with flask_app.test_client() as client:
+        yield client
 
-    yield app
-
-@pytest.fixture(scope='module')
-def client(app):
-    """Un cliente de pruebas para la app."""
-    return app.test_client()
