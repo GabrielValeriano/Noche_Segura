@@ -59,25 +59,39 @@ def test_crear_usuario_falla_conexion_db(client, monkeypatch):
     assert 'error' in data
     assert data['error'] == "No se pudo conectar a la base de datos"
 
+
+
 def test_crear(client):
-    datos_usuario = {
-        "nombre_usuario": "Joelta",
-        "email": "joelita@gmail.com",
+
+    datos_nuevo_usuario = {
+        "nombre_usuario": "Eva",
+        "email": "evesita@test.com",
         "contrasena": "123456",
-        "pregunta_seguridad": "¿Ciudad donde naciste?",
-        "respuesta_seguridad": "Capital"
+        "pregunta_seguridad": "¿Cuidad donde naciste?",
+        "respuesta_seguridad": "Perro"
     }
-        
     usuario_id = None
-    
-    response_post = client.post('/usuarios',data=json.dumps(datos_usuario),content_type='application/json')
-    
+
+
+    print("Iniciando creación de usuario...")
+    response_post = client.post(
+        '/usuarios',
+        data=json.dumps(datos_nuevo_usuario),
+        content_type='application/json'
+    )
+
     assert response_post.status_code == 201
     data_post = response_post.get_json()
+    usuario_id = data_post.get('usuario_id')
+    assert usuario_id is not None, "El endpoint POST debe retornar 'usuario_id'."
 
-    assert 'usuario_id' in data_post
-    usuario_id = data_post['usuario_id']
+    print(f"Borrando usuario con ID: {usuario_id}...")
+    response_delete = client.delete(f'/usuarios/{usuario_id}')
+    assert response_delete.status_code in [200, 204]
+    print(f"Verificando que ID {usuario_id} ya no existe...")
+    response_get_check = client.get(f'/usuarios/{usuario_id}')
+    assert response_get_check.status_code == 405
+    print("Procedimiento Crear y Borrar completado exitosamente.")
 
-    if not usuario_id:
-        assert False, "La creación de usuario no devolvió un ID válido."
+
 
