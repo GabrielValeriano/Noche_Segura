@@ -6,18 +6,18 @@ def test_faltan_datos(client):
         "nombre_usuario": "testuser", 
         "email": "test@ejemplo.com", 
         "contrasena": "password123", 
-        "pregunta_seguridad": "¿Color favorito?"
+        "pregunta_seguridad": "¿Ciudad donde naciste?"
         # Falta 'respuesta_seguridad'
     }
     
     response = client.post('/usuarios',data=json.dumps(datos_incompletos),content_type='application/json')
     
-    assert response.status_code == 400, "Debe devolver 400 si faltan campos."
+    assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
     assert data['error'] == "Faltan datos (se requieren 5 campos)"
 
-def test_crear_usuario_existente(client):
+def test_usuario_existente(client):
     datos_usuario = {
         "nombre_usuario": "Miguel",
         "email": "miguelito@mail.com",

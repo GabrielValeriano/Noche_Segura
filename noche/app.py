@@ -283,12 +283,8 @@ def login_usuario():
         return jsonify({"error": "El correo no está registrado"}), 401
     if not check_password_hash(user['contraseña_hash'], contrasena):
         return jsonify({"error": "Contraseña incorrecta"}), 401
-    return jsonify({
-        "mensaje": "Login exitoso",
-        "usuario_id": user['usuario_id'],
-        "nombre_usuario": user['nombre_usuario'],
-        "email": user['email']
-    }), 200
+    return jsonify({"mensaje": "Login exitoso"}), 200
+
 
 # ===============================================
 # --- NUEVAS RUTAS DE RECUPERACIÓN (Versión simple) ---
