@@ -1,6 +1,6 @@
 import json
 import mysql.connector
-
+#prueba que pasa cuando sale todo bien,envia un delete para borrar usario
 def test_eliminar_usuario_exitoso(client, mock_db):
     mock_conn, mock_cursor = mock_db
     
@@ -19,6 +19,7 @@ def test_eliminar_usuario_exitoso(client, mock_db):
     assert mock_conn.commit.called # Se debe confirmar la transacción
 
 def test_eliminar_usuario_error_bd(client, mock_db):
+    #Prueba qué pasa si la base de datos falla
     mock_conn, mock_cursor = mock_db
     
     # Hacemos que execute lance una excepción

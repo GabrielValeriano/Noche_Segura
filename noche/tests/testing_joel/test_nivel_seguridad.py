@@ -2,6 +2,7 @@ import json
 from unittest.mock import MagicMock
 
 def test_get_niveles_seguridad_exitoso(client, mock_db):
+    #busca que no solo tenga los datos si no que los reformatee para el frontend
     mock_conn, mock_cursor = mock_db
     
     # Simulamos que la base de datos devuelve dos zonas
@@ -20,6 +21,7 @@ def test_get_niveles_seguridad_exitoso(client, mock_db):
     assert data['Villa Soldati'] == 3
 
 def test_get_niveles_error_bd(client, mock_db):
+    #Prueba qué pasa si el servidor no puede conectarse a la base de datos(si sql se cae)
     mock_conn, mock_cursor = mock_db
     
     # Simulamos que la conexión falla (retorna None)

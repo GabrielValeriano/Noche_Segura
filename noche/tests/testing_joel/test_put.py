@@ -2,7 +2,7 @@ import json
 
 def test_actualizar_usuario_exitoso(client, mock_db):
     mock_conn, mock_cursor = mock_db
-
+#Prueba que los datos del usuario se modifiquen correctamente cuando todo está bien.
     # Datos nuevos
     payload = {
         "nombre_usuario": "nuevo_nombre",
@@ -26,6 +26,7 @@ def test_actualizar_usuario_exitoso(client, mock_db):
     assert 123 in parametros  # El ID del usuario
 
 def test_actualizar_sin_datos(client, mock_db):
+    #Prueba que la API sea inteligente y rechace peticiones vacías.
     # Enviamos JSON vacío
     response = client.put('/usuarios/123', json={})
     
@@ -33,6 +34,7 @@ def test_actualizar_sin_datos(client, mock_db):
     assert "No se proporcionaron datos" in json.loads(response.data)['mensaje']
 
 def test_actualizar_error_bd(client, mock_db):
+    #Prueba que la API no se rompa si la base de datos rechaza la actualización.
     mock_conn, mock_cursor = mock_db
     
     # Simulamos que la base de datos falla al hacer commit o execute

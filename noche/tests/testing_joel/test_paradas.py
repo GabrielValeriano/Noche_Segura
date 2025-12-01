@@ -1,6 +1,7 @@
 import json
 
 def test_get_paradas_agrupadas(client, mock_db):
+    #verifica si el backend puede manejar el hecho de que mas de un colectivo por una parada
     _, mock_cursor = mock_db
 
     # Simulamos datos de la BD.
@@ -34,6 +35,7 @@ def test_get_paradas_agrupadas(client, mock_db):
     assert 102 in parada_1['lineas']
 
 def test_paradas_vacias(client, mock_db):
+    #devuelve una parada vacia que no encuentra lineas de colectivo 
     _, mock_cursor = mock_db
     mock_cursor.fetchall.return_value = []
 

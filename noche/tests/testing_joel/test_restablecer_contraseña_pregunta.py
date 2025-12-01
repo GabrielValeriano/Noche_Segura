@@ -2,9 +2,13 @@ import json
 from werkzeug.security import generate_password_hash
 
 def test_obtener_pregunta_usuario_existente(client, mock_db):
+    """
+    Verifica que la API devuelva la pregunta de seguridad correcta
+    cuando el usuario existe en la base de datos.
+    """
     _, mock_cursor = mock_db
     
-    # Simulamos que la BD encuentra al usuario y su pregunta
+    # Simulamos que la BD encuentra al usuario y devuelve su pregunta
     mock_cursor.fetchone.return_value = {
         'pregunta_seguridad': '¿Nombre de tu mascota?'
     }
@@ -16,6 +20,10 @@ def test_obtener_pregunta_usuario_existente(client, mock_db):
     assert json.loads(response.data)['pregunta'] == '¿Nombre de tu mascota?'
 
 def test_obtener_pregunta_usuario_inexistente(client, mock_db):
+    """
+    Verifica que la API devuelva 404 (Not Found) si el usuario no existe,
+    evitando errores internos o respuestas vacías.
+    """
     _, mock_cursor = mock_db
     mock_cursor.fetchone.return_value = None  # Usuario no encontrado
     
@@ -26,10 +34,16 @@ def test_obtener_pregunta_usuario_inexistente(client, mock_db):
     assert "No se encontró" in json.loads(response.data)['error']
 
 def test_restablecer_respuesta_correcta(client, mock_db):
+    """
+    Simula el flujo exitoso de recuperación:
+    1. La BD tiene un hash guardado.
+    2. El usuario envía la respuesta correcta en texto plano.
+    3. El backend verifica el hash y actualiza la contraseña.
+    """
     mock_conn, mock_cursor = mock_db
     
-    # 1. Simulamos que la BD devuelve el hash de la respuesta correcta
-    # Digamos que la respuesta correcta es "Firulais"
+    # TRUCO DE TEST: Generamos un hash real aquí mismo para que
+    # la validación del backend (check_password_hash) funcione correctamente.
     hash_respuesta = generate_password_hash("Firulais")
     
     mock_cursor.fetchone.return_value = {
@@ -48,15 +62,20 @@ def test_restablecer_respuesta_correcta(client, mock_db):
     assert response.status_code == 200
     assert "actualizada con éxito" in json.loads(response.data)['mensaje']
     
-    # Verificamos que se hizo un UPDATE de la contraseña
+    # IMPORTANTE: Verificamos que se hizo commit (guardar cambios)
+    # y que realmente se ejecutó el UPDATE en la tabla Usuarios.
     assert mock_conn.commit.called
     args, _ = mock_cursor.execute.call_args
     assert "UPDATE Usuarios SET contraseña_hash" in args[0]
 
 def test_restablecer_respuesta_incorrecta(client, mock_db):
+    """
+    Verifica seguridad: Si la respuesta enviada no coincide con el hash de la BD,
+    debe rechazar el cambio con un error 401 (Unauthorized).
+    """
     _, mock_cursor = mock_db
     
-    # Hash de "Firulais"
+    # La BD espera el hash de "Firulais"
     hash_respuesta = generate_password_hash("Firulais")
     
     mock_cursor.fetchone.return_value = {
