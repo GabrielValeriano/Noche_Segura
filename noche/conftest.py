@@ -92,3 +92,55 @@ def setup_zona_geojson_invalido():
                 connection.commit()
             finally:
                 if connection: connection.close()
+
+
+
+# Datos reutilizables para los tests
+USUARIO_TEST = ("usuario_temp", "temp@test.com", "pass_temp", "¿Color favorito?", "Azul")
+
+@pytest.fixture(scope="function")
+def setup_usuario_id():
+    """
+    Inserta un usuario en la DB antes de la prueba (Setup) y 
+    garantiza su eliminación después (Teardown).
+    Devuelve el 'usuario_id' generado.
+    """
+    usuario_id_creado = None
+    connection = None
+    cursor = None
+    
+    try:
+        # --- PARTE 1: SETUP (Insertar el Usuario) ---
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        
+        sql_insert = """
+            INSERT INTO Usuarios(nombre_usuario, email, contraseña_hash, pregunta_seguridad, respuesta_seguridad_hash) 
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql_insert, (USUARIO_TEST))
+        connection.commit()
+        
+        # OBTENEMOS el ID generado por la DB
+        usuario_id_creado = cursor.lastrowid
+        
+        # ENTREGAMOS el ID al test que use este fixture
+        yield usuario_id_creado 
+        
+    finally:
+        # --- PARTE 2: TEARDOWN (Eliminar el Usuario) ---
+        # Se ejecuta después de que el test termina.
+        if connection and usuario_id_creado is not None:
+            try:
+                # Reabrimos un cursor si fuera necesario, o usamos el existente si está abierto
+                cursor_delete = connection.cursor() 
+                sql_delete = "DELETE FROM Usuarios WHERE usuario_id = %s"
+                cursor_delete.execute(sql_delete, (usuario_id_creado,))
+                connection.commit()
+            except Exception as e:
+                # Manejo de errores de limpieza, si falla el test o la DB.
+                print(f"Error en la limpieza (Teardown) del usuario ID {usuario_id_creado}: {e}")
+            finally:
+                if cursor: cursor.close()
+                if 'cursor_delete' in locals(): cursor_delete.close()
+                if connection: connection.close()

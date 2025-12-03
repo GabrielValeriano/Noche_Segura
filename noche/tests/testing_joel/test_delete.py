@@ -1,31 +1,47 @@
 import json
 import mysql.connector
-#prueba que pasa cuando sale todo bien,envia un delete para borrar usario
-def test_eliminar_usuario_exitoso(client, mock_db):
-    mock_conn, mock_cursor = mock_db
-    
-    # No necesitamos simular fetchone/all porque DELETE no devuelve filas,
-    # solo necesitamos que no falle.
-    
-    response = client.delete('/usuarios/55')
-    
-    assert response.status_code == 200
-    assert json.loads(response.data)['mensaje'] == "Usuario eliminado"
-    
-    # Verificar que se llamó al SQL correcto
-    args, _ = mock_cursor.execute.call_args
-    assert "DELETE FROM Usuarios" in args[0]
-    assert 55 in args[1] # El ID pasado
-    assert mock_conn.commit.called # Se debe confirmar la transacción
 
-def test_eliminar_usuario_error_bd(client, mock_db):
-    #Prueba qué pasa si la base de datos falla
-    mock_conn, mock_cursor = mock_db
+
+
+
+def test_delete_falla_conexion_db(client, monkeypatch):
+    """
+    Simula una falla de conexión a la base de datos durante la ELIMINACIÓN (DELETE).
+    """
+    # Usamos un ID cualquiera, ya que la conexión fallará antes de buscarlo
+    ID_A_BORRAR = 9999 
+    delete_url = f'/usuarios/{ID_A_BORRAR}'
+
+    def mock_get_db_connection_falla():
+        """Función simulada que siempre devuelve None."""
+        return None 
+
+    # Reemplaza la función real por la función simulada
+    monkeypatch.setattr('app.get_db_connection', mock_get_db_connection_falla)
+
+    # Ejecutar DELETE
+    response = client.delete(delete_url)
+
+    # Verificaciones
+    assert response.status_code == 500, f"Se esperaba 500, se obtuvo {response.status_code}"
     
-    # Hacemos que execute lance una excepción
-    mock_cursor.execute.side_effect = mysql.connector.Error("Error de integridad FK")
-    
-    response = client.delete('/usuarios/55')
-    
-    assert response.status_code == 500
-    assert "Error al eliminar" in json.loads(response.data)['error']
+    data = response.get_json()
+    assert 'error' in data
+    assert data['error'] == "No se pudo conectar a la base de datos"
+
+    print(f"✅ Prueba de DELETE con falla de conexión a DB (500) completada exitosamente.")
+
+
+
+
+def test_eliminar_usuario_usando_fixture(client, setup_usuario_id):
+    # 'setup_usuario_id' ahora contiene el ID que la fixture insertó
+    id_a_eliminar = setup_usuario_id 
+
+    # Llamar al endpoint DELETE
+    delete_url = f'/usuarios/{id_a_eliminar}'
+    response = client.delete(delete_url)
+    data = json.loads(response.get_data(as_text=True))
+
+    assert response.status_code == 200
+    assert data['mensaje'] == 'Usuario eliminado'

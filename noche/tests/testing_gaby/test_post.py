@@ -64,8 +64,8 @@ def test_crear_usuario_falla_conexion_db(client, monkeypatch):
 def test_crear(client):
 
     datos_nuevo_usuario = {
-        "nombre_usuario": "Eva",
-        "email": "evesita@test.com",
+        "nombre_usuario": "Evqa",
+        "email": "evesqita@test.com",
         "contrasena": "123456",
         "pregunta_seguridad": "¿Cuidad donde naciste?",
         "respuesta_seguridad": "Perro"
